@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findByCampaignId(Long campaignId);
+    boolean existsByCampaign_IdAndIdentityNumber(Long campaignId, String identityNumber);
 }

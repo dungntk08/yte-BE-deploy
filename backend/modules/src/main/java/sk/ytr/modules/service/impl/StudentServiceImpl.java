@@ -11,6 +11,7 @@ import sk.ytr.modules.repository.MedicalCampaignRepository;
 import sk.ytr.modules.repository.StudentRepository;
 import sk.ytr.modules.service.StudentService;
 import sk.ytr.modules.utils.DateUtils;
+import sk.ytr.modules.validate.StudentServiceValidate;
 
 import java.util.List;
 
@@ -21,10 +22,12 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final MedicalCampaignRepository medicalCampaignRepository;
+    private final StudentServiceValidate studentServiceValidate;
 
     @Override
     public StudentResponseDTO create(StudentRequestDTO request) {
         try {
+            studentServiceValidate.validateCreateRequest(request);
             MedicalCampaign campaign = medicalCampaignRepository.findById(request.getCampaignId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt khám"));
 
@@ -45,6 +48,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentResponseDTO update(Long id, StudentRequestDTO request) {
         try {
+            studentServiceValidate.validateCreateRequest(request);
             Student student = studentRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy học sinh"));
 

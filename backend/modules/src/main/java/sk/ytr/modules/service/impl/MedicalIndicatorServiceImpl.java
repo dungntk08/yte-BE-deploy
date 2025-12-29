@@ -10,6 +10,7 @@ import sk.ytr.modules.entity.MedicalIndicator;
 import sk.ytr.modules.repository.MedicalGroupRepository;
 import sk.ytr.modules.repository.MedicalIndicatorRepository;
 import sk.ytr.modules.service.MedicalIndicatorService;
+import sk.ytr.modules.validate.MedicalIndicatorServiceValidate;
 
 import java.util.List;
 
@@ -20,10 +21,12 @@ public class MedicalIndicatorServiceImpl implements MedicalIndicatorService {
 
     private final MedicalIndicatorRepository medicalIndicatorRepository;
     private final MedicalGroupRepository groupRepository;
+    private final MedicalIndicatorServiceValidate medicalIndicatorServiceValidate;
 
     @Override
     public MedicalIndicatorResponseDTO create(MedicalIndicatorRequestDTO request) {
         try {
+            medicalIndicatorServiceValidate.validateCreateRequest(request);
             MedicalGroup group = groupRepository.findById(request.getGroupId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy nhóm chỉ tiêu"));
 
@@ -45,6 +48,7 @@ public class MedicalIndicatorServiceImpl implements MedicalIndicatorService {
 
     @Override
     public MedicalIndicatorResponseDTO update(Long id, MedicalIndicatorRequestDTO request) {
+        medicalIndicatorServiceValidate.validateCreateRequest(request);
         MedicalIndicator indicator = medicalIndicatorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chỉ tiêu"));
 

@@ -10,6 +10,7 @@ import sk.ytr.modules.entity.MedicalSubIndicator;
 import sk.ytr.modules.repository.MedicalIndicatorRepository;
 import sk.ytr.modules.repository.MedicalSubIndicatorRepository;
 import sk.ytr.modules.service.MedicalSubIndicatorService;
+import sk.ytr.modules.validate.MedicalSubIndicatorServiceValidate;
 
 import java.util.List;
 
@@ -20,10 +21,11 @@ public class MedicalSubIndicatorServiceImpl implements MedicalSubIndicatorServic
 
     private final MedicalSubIndicatorRepository medicalSubIndicatorRepository;
     private final MedicalIndicatorRepository medicalIndicatorRepository;
-
+    private final MedicalSubIndicatorServiceValidate medicalSubIndicatorServiceValidate;
     @Override
     public MedicalSubIndicatorResponseDTO create(MedicalSubIndicatorRequestDTO request) {
         try {
+            medicalSubIndicatorServiceValidate.validateCreateRequest(request);
             MedicalIndicator indicator = medicalIndicatorRepository.findById(request.getIndicatorId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy chỉ tiêu khám"));
 
@@ -40,6 +42,7 @@ public class MedicalSubIndicatorServiceImpl implements MedicalSubIndicatorServic
     @Override
     public MedicalSubIndicatorResponseDTO update(Long id, MedicalSubIndicatorRequestDTO request) {
         try {
+            medicalSubIndicatorServiceValidate.validateCreateRequest(request);
             MedicalSubIndicator entity = medicalSubIndicatorRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy chỉ số con"));
 

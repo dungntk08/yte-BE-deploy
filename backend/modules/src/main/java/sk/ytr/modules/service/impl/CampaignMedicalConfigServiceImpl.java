@@ -13,6 +13,7 @@ import sk.ytr.modules.repository.MedicalCampaignRepository;
 import sk.ytr.modules.repository.MedicalSubIndicatorRepository;
 import sk.ytr.modules.service.CampaignMedicalConfigService;
 import sk.ytr.modules.utils.DateUtils;
+import sk.ytr.modules.validate.CampaignMedicalConfigServiceValidate;
 
 import java.util.List;
 
@@ -24,10 +25,11 @@ public class CampaignMedicalConfigServiceImpl implements CampaignMedicalConfigSe
     private final CampaignMedicalConfigRepository campaignMedicalConfigRepository;
     private final MedicalCampaignRepository campaignRepository;
     private final MedicalSubIndicatorRepository subIndicatorRepository;
-
+    private final CampaignMedicalConfigServiceValidate campaignMedicalConfigServiceValidate;
     @Override
     public CampaignMedicalConfigResponseDTO create(CampaignMedicalConfigRequestDTO request) {
         try {
+            campaignMedicalConfigServiceValidate.validateCreateRequest(request);
             MedicalCampaign campaign = campaignRepository.findById(request.getCampaignId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt khám"));
 
@@ -53,6 +55,7 @@ public class CampaignMedicalConfigServiceImpl implements CampaignMedicalConfigSe
     @Override
     public CampaignMedicalConfigResponseDTO update(Long id, CampaignMedicalConfigRequestDTO request) {
         try {
+            campaignMedicalConfigServiceValidate.validateCreateRequest(request);
             CampaignMedicalConfig entity = campaignMedicalConfigRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy cấu hình khám"));
 
@@ -64,7 +67,7 @@ public class CampaignMedicalConfigServiceImpl implements CampaignMedicalConfigSe
 
         } catch (Exception e) {
             log.error("Lỗi cập nhật cấu hình khám", e);
-            throw new RuntimeException("Cập nhật cấu hình khám thất bại");
+            throw new RuntimeException("Cập nhật cấu hình khám thất bại: " + e.getMessage());
         }
     }
 
@@ -80,7 +83,7 @@ public class CampaignMedicalConfigServiceImpl implements CampaignMedicalConfigSe
         try {
             campaignMedicalConfigRepository.deleteById(id);
         } catch (Exception e) {
-            throw new RuntimeException("Xóa cấu hình khám thất bại");
+            throw new RuntimeException("Xóa cấu hình khám thất bại: " + e.getMessage());
         }
     }
 

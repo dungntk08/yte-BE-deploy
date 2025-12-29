@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface MedicalIndicatorRepository extends JpaRepository<MedicalIndicator, Long> {
     List<MedicalIndicator> findByGroupId(Long groupId);
+    boolean existsByIndicatorCode(String indicatorCode);
+    boolean existsByGroup_IdAndIndicatorName(Long groupId, String indicatorName);
 }

@@ -11,8 +11,8 @@ import sk.ytr.modules.repository.MedicalCampaignRepository;
 import sk.ytr.modules.repository.SchoolRepository;
 import sk.ytr.modules.service.MedicalCampaignService;
 import sk.ytr.modules.utils.DateUtils;
+import sk.ytr.modules.validate.CampaignMedicalServiceValidate;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -22,10 +22,12 @@ public class MedicalCampaignServiceImpl implements MedicalCampaignService {
 
     private final MedicalCampaignRepository medicalCampaignRepository;
     private final SchoolRepository schoolRepository;
-
+    private final CampaignMedicalServiceValidate campaignMedicalServiceValidate;
     @Override
     public MedicalCampaignResponseDTO create(MedicalCampaignRequestDTO request) {
         try {
+
+            campaignMedicalServiceValidate.validateCreateRequest(request);
             School school = schoolRepository.findById(request.getSchoolId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy trường"));
 
@@ -37,6 +39,8 @@ public class MedicalCampaignServiceImpl implements MedicalCampaignService {
                     .endDate(request.getEndDate())
                     .status(request.getStatus())
                     .note(request.getNote())
+                    .totalStudents(request.getTotalStudents())
+                    .totalStudentsExamined(request.getTotalStudentsExamined())
                     .build();
 
             campaign.setCreatedBy("ADMIN"); // tạm thời
@@ -56,6 +60,7 @@ public class MedicalCampaignServiceImpl implements MedicalCampaignService {
     @Override
     public MedicalCampaignResponseDTO update(Long id, MedicalCampaignRequestDTO request) {
         try {
+            campaignMedicalServiceValidate.validateCreateRequest(request);
             MedicalCampaign campaign = medicalCampaignRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt khám"));
 

@@ -8,6 +8,7 @@ import sk.ytr.modules.dto.response.MedicalGroupResponseDTO;
 import sk.ytr.modules.entity.MedicalGroup;
 import sk.ytr.modules.repository.MedicalGroupRepository;
 import sk.ytr.modules.service.MedicalGroupService;
+import sk.ytr.modules.validate.MedicalGroupServiceValidate;
 
 import java.util.List;
 
@@ -17,10 +18,11 @@ import java.util.List;
 public class MedicalGroupServiceImpl implements MedicalGroupService {
 
     private final MedicalGroupRepository medicalGroupRepository;
-
+    private final MedicalGroupServiceValidate medicalGroupServiceValidate;
     @Override
     public MedicalGroupResponseDTO create(MedicalGroupRequestDTO request) {
         try {
+            medicalGroupServiceValidate.validateCreateRequest(request);
             MedicalGroup group = MedicalGroup.builder()
                     .groupCode(request.getGroupCode())
                     .groupName(request.getGroupName())
