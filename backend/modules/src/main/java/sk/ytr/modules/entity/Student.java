@@ -9,6 +9,7 @@ import sk.ytr.modules.constant.GenderTypeEnum;
 import sk.ytr.modules.dto.request.StudentRequestDTO;
 import sk.ytr.modules.entity.common.BaseEntity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -55,11 +56,11 @@ public class Student extends BaseEntity {
 
     /** Cân nặng (kg) */
     @Column(name = "weight", precision = 5, scale = 2)
-    private Double weight;
+    private BigDecimal  weight;
 
     /** Chiều cao (cm) */
     @Column(name = "height", precision = 5, scale = 2)
-    private Double height;
+    private BigDecimal height;
 
     /** Nội dung thông báo kết quả khám gửi về gia đình */
     @Column(name = "notify_family", length = 1000)

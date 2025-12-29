@@ -4,6 +4,7 @@ import lombok.*;
 import sk.ytr.modules.constant.GenderTypeEnum;
 import sk.ytr.modules.entity.Student;
 
+import java.math.BigDecimal;
 import java.util.Date;
 @Getter
 @Setter
@@ -34,10 +35,10 @@ public class StudentResponseDTO {
     private String identityNumber;
 
     /** Cân nặng (kg) */
-    private Double weight;
+    private BigDecimal weight;
 
     /** Chiều cao (cm) */
-    private Double height;
+    private BigDecimal height;
 
     /** Nội dung thông báo về gia đình */
     private String notifyFamily;

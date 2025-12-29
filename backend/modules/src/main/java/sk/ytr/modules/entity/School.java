@@ -13,7 +13,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @Entity
 @Table(name = "school")
-@EntityListeners(AuditingEntityListener.class)
 public class School {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "school_seq")
