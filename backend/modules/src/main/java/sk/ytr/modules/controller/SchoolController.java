@@ -10,10 +10,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/schools")
 @CrossOrigin
+@RequiredArgsConstructor
 @Slf4j
 public class SchoolController {
 
-    private SchoolService service;
+    private final SchoolService service;
 
     @GetMapping("/{id}")
     public SchoolResponseDTO

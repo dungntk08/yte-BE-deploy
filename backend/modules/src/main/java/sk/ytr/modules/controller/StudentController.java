@@ -1,5 +1,6 @@
 package sk.ytr.modules.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import sk.ytr.modules.dto.request.StudentRequestDTO;
@@ -10,10 +11,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/students")
 @CrossOrigin
+@RequiredArgsConstructor
 @Slf4j
 public class StudentController {
 
-    private StudentService service;
+    private final StudentService service;
 
     @PostMapping
     public StudentResponseDTO create(

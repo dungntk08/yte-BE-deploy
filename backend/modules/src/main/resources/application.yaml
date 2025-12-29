@@ -23,7 +23,7 @@ spring:
   flyway:
     enabled: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5432/yte
     username: postgres
     password: 123qwe
     driver-class-name: org.postgresql.Driver

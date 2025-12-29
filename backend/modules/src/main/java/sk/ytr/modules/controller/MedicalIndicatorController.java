@@ -12,10 +12,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/medical-indicators")
 @CrossOrigin
+@RequiredArgsConstructor
 @Slf4j
 public class MedicalIndicatorController {
 
-    private MedicalIndicatorService service;
+    private final MedicalIndicatorService service;
 
     @PostMapping
     public MedicalIndicatorResponseDTO create(

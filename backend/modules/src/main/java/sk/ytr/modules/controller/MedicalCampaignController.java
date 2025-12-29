@@ -11,10 +11,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/medical-campaigns")
 @CrossOrigin
+@RequiredArgsConstructor
 @Slf4j
 public class MedicalCampaignController {
 
-    private MedicalCampaignService service;
+    private final MedicalCampaignService service;
 
     @PostMapping
     public MedicalCampaignResponseDTO create(
