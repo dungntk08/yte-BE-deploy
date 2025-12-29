@@ -36,4 +36,10 @@ public class MedicalCampaignRequestDTO {
 
     /** Trạng thái đợt khám: DRAFT / IN_PROGRESS / CLOSED */
     private CampaignStatusEnum status;
+
+    /** tổng số học sinh*/
+    private Integer totalStudents;
+
+    /** tổng số học sinh được khám*/
+    private Integer totalStudentsExamined;
 }

@@ -55,4 +55,12 @@ public class MedicalCampaign extends BaseEntity {
     /** Ghi chú thêm cho đợt khám */
     @Column(name = "note", length = 1000)
     private String note;
+
+    /** tổng số học sinh*/
+    @Column(name = "total_students")
+    private Integer totalStudents;
+
+    /** tổng số học sinh được khám*/
+    @Column(name = "total_students_examined")
+    private Integer totalStudentsExamined;
 }

@@ -40,6 +40,12 @@ public class MedicalCampaignResponseDTO {
     /** Ghi chú */
     private String note;
 
+    /** tổng số học sinh*/
+    private Integer totalStudents;
+
+    /** tổng số học sinh được khám*/
+    private Integer totalStudentsExamined;
+
     public static MedicalCampaignResponseDTO fromEntity(MedicalCampaign entity) {
         return MedicalCampaignResponseDTO.builder()
                 .id(entity.getId())
@@ -50,6 +56,8 @@ public class MedicalCampaignResponseDTO {
                 .endDate(entity.getEndDate())
                 .status(entity.getStatus())
                 .note(entity.getNote())
+                .totalStudents(entity.getTotalStudents())
+                .totalStudentsExamined(entity.getTotalStudentsExamined())
                 .build();
     }
 }
