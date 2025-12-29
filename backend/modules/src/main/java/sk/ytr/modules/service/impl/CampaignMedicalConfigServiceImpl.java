@@ -12,6 +12,7 @@ import sk.ytr.modules.repository.CampaignMedicalConfigRepository;
 import sk.ytr.modules.repository.MedicalCampaignRepository;
 import sk.ytr.modules.repository.MedicalSubIndicatorRepository;
 import sk.ytr.modules.service.CampaignMedicalConfigService;
+import sk.ytr.modules.utils.DateUtils;
 
 import java.util.List;
 

@@ -10,6 +10,7 @@ import sk.ytr.modules.entity.Student;
 import sk.ytr.modules.repository.MedicalCampaignRepository;
 import sk.ytr.modules.repository.StudentRepository;
 import sk.ytr.modules.service.StudentService;
+import sk.ytr.modules.utils.DateUtils;
 
 import java.util.List;
 
@@ -27,9 +28,13 @@ public class StudentServiceImpl implements StudentService {
             MedicalCampaign campaign = medicalCampaignRepository.findById(request.getCampaignId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy đợt khám"));
 
-            Student entity = request.toEntity(campaign);
+            Student student = request.toEntity(campaign);
+            student.setCreatedDate(DateUtils.getNow());
+            student.setCreatedBy("ADMIN"); // Thay "ADMIN" bằng người dùng thực tế nếu có
+            student.setModifiedDate(DateUtils.getNow());
+            student.setUpdatedBy("ADMIN"); // Thay "ADMIN" bằng người dùng thực tế nếu có
             return StudentResponseDTO.fromEntity(
-                    studentRepository.save(entity)
+                    studentRepository.save(student)
             );
         } catch (Exception e) {
             log.error("Lỗi tạo học sinh", e);
@@ -40,13 +45,14 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentResponseDTO update(Long id, StudentRequestDTO request) {
         try {
-            Student entity = studentRepository.findById(id)
+            Student student = studentRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy học sinh"));
 
-            entity.updateFromRequest(request);
-
+            student.updateFromRequest(request);
+            student.setModifiedDate(DateUtils.getNow());
+            student.setUpdatedBy("ADMIN"); // Thay "ADMIN" bằng người dùng thực tế nếu có
             return StudentResponseDTO.fromEntity(
-                    studentRepository.save(entity)
+                    studentRepository.save(student)
             );
         } catch (Exception e) {
             log.error("Lỗi cập nhật học sinh", e);

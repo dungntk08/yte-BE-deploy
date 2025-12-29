@@ -10,7 +10,9 @@ import sk.ytr.modules.entity.School;
 import sk.ytr.modules.repository.MedicalCampaignRepository;
 import sk.ytr.modules.repository.SchoolRepository;
 import sk.ytr.modules.service.MedicalCampaignService;
+import sk.ytr.modules.utils.DateUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -37,6 +39,11 @@ public class MedicalCampaignServiceImpl implements MedicalCampaignService {
                     .note(request.getNote())
                     .build();
 
+            campaign.setCreatedBy("ADMIN"); // tạm thời
+            campaign.setCreatedDate(DateUtils.getNow());
+            campaign.setUpdatedBy("ADMIN"); // tạm thời
+            campaign.setModifiedDate(DateUtils.getNow());
+
             medicalCampaignRepository.save(campaign);
             return MedicalCampaignResponseDTO.fromEntity(campaign);
 
@@ -57,6 +64,8 @@ public class MedicalCampaignServiceImpl implements MedicalCampaignService {
             campaign.setEndDate(request.getEndDate());
             campaign.setStatus(request.getStatus());
             campaign.setNote(request.getNote());
+            campaign.setUpdatedBy("ADMIN"); // tạm thời
+            campaign.setModifiedDate(DateUtils.getNow());
 
             medicalCampaignRepository.save(campaign);
             return MedicalCampaignResponseDTO.fromEntity(campaign);

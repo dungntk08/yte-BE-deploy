@@ -12,6 +12,7 @@ import sk.ytr.modules.repository.CampaignMedicalConfigRepository;
 import sk.ytr.modules.repository.MedicalResultDetailRepository;
 import sk.ytr.modules.repository.StudentRepository;
 import sk.ytr.modules.service.MedicalResultDetailService;
+import sk.ytr.modules.utils.DateUtils;
 
 import java.util.List;
 
@@ -34,9 +35,13 @@ public class MedicalResultDetailServiceImpl implements MedicalResultDetailServic
                     .findById(request.getCampaignMedicalConfigId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy cấu hình chỉ tiêu khám"));
 
-            MedicalResultDetail entity = request.toEntity(student, config);
+            MedicalResultDetail medicalResultDetail = request.toEntity(student, config);
+            medicalResultDetail.setCreatedBy("ADMIN"); // tạm thời
+            medicalResultDetail.setCreatedDate(DateUtils.getNow());
+            medicalResultDetail.setModifiedDate(DateUtils.getNow());
+            medicalResultDetail.setUpdatedBy("ADMIN"); // tạm thời
             return MedicalResultDetailResponseDTO.fromEntity(
-                    medicalResultDetailRepository.save(entity)
+                    medicalResultDetailRepository.save(medicalResultDetail)
             );
         } catch (Exception e) {
             log.error("Lỗi khi tạo kết quả khám", e);
@@ -47,13 +52,15 @@ public class MedicalResultDetailServiceImpl implements MedicalResultDetailServic
     @Override
     public MedicalResultDetailResponseDTO update(Long id, MedicalResultDetailRequestDTO request) {
         try {
-            MedicalResultDetail entity = medicalResultDetailRepository.findById(id)
+            MedicalResultDetail medicalResultDetail = medicalResultDetailRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy kết quả khám"));
 
-            entity.updateFromRequest(request);
+            medicalResultDetail.updateFromRequest(request);
+            medicalResultDetail.setModifiedDate(DateUtils.getNow());
+            medicalResultDetail.setUpdatedBy("ADMIN"); // tạm thời
 
             return MedicalResultDetailResponseDTO.fromEntity(
-                    medicalResultDetailRepository.save(entity)
+                    medicalResultDetailRepository.save(medicalResultDetail)
             );
         } catch (Exception e) {
             log.error("Lỗi khi cập nhật kết quả khám", e);
