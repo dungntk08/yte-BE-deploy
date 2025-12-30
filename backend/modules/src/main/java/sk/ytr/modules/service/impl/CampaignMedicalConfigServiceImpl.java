@@ -31,6 +31,14 @@ public class CampaignMedicalConfigServiceImpl implements CampaignMedicalConfigSe
     private final MedicalSubIndicatorRepository subIndicatorRepository;
     private final CampaignMedicalConfigServiceValidate campaignMedicalConfigServiceValidate;
     private final CampaignMedicalConfigSubRepository configSubRepository;
+
+    /**
+     * Tạo mới cấu hình khám.
+     *
+     * @param request DTO chứa thông tin yêu cầu tạo mới cấu hình khám.
+     * @return DTO chứa thông tin cấu hình khám vừa được tạo.
+     * @throws RuntimeException nếu xảy ra lỗi trong quá trình xử lý.
+     */
     @Override
     public CampaignMedicalConfigResponseDTO createCampaignMedicalConfig(CampaignMedicalConfigRequestDTO request) {
         try {
@@ -49,6 +57,14 @@ public class CampaignMedicalConfigServiceImpl implements CampaignMedicalConfigSe
         }
     }
 
+    /**
+     * Cập nhật cấu hình khám.
+     *
+     * @param id      ID của cấu hình khám cần cập nhật.
+     * @param request DTO chứa thông tin yêu cầu cập nhật cấu hình khám.
+     * @return DTO chứa thông tin cấu hình khám sau khi được cập nhật.
+     * @throws RuntimeException nếu xảy ra lỗi trong quá trình xử lý.
+     */
     @Override
     public CampaignMedicalConfigResponseDTO updateCampaignMedicalConfig(Long id, CampaignMedicalConfigRequestDTO request) {
         try {
@@ -65,6 +81,7 @@ public class CampaignMedicalConfigServiceImpl implements CampaignMedicalConfigSe
         }
     }
 
+    /** Lấy chi tiết theo ID */
     @Override
     public CampaignMedicalConfigResponseDTO getCampaignMedicalConfigById(Long id) {
         CampaignMedicalConfig entity = campaignMedicalConfigRepository.findById(id)
@@ -72,6 +89,7 @@ public class CampaignMedicalConfigServiceImpl implements CampaignMedicalConfigSe
         return CampaignMedicalConfigResponseDTO.fromEntity(entity);
     }
 
+    /** Xóa cấu hình */
     @Override
     public void deleteCampaignMedicalConfig(Long id) {
         try {
