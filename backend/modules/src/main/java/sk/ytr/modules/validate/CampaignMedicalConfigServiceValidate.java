@@ -17,39 +17,6 @@ public class CampaignMedicalConfigServiceValidate {
 
     public void validateCreateRequest(CampaignMedicalConfigRequestDTO request) {
 
-        if (request.getCampaignId() == null) {
-            throw new IllegalArgumentException("đợt khám không được để trống");
-        }
-
-        if (request.getSubIndicatorId() == null) {
-            throw new IllegalArgumentException("chỉ tiêu con không được để trống");
-        }
-
-        if (request.getIsRequired() == null) {
-            throw new IllegalArgumentException("isRequired không được để trống");
-        }
-
-        // ===== CHECK TỒN TẠI =====
-        if (!medicalCampaignRepository.existsById(request.getCampaignId())) {
-            throw new IllegalArgumentException("đợt khám không tồn tại");
-        }
-
-        if (!subIndicatorRepository.existsById(request.getSubIndicatorId())) {
-            throw new IllegalArgumentException("chỉ tiêu con không tồn tại");
-        }
-
-        // ===== CHECK TRÙNG CẤU HÌNH =====
-        boolean exists = campaignMedicalConfigRepository
-                .existsByCampaign_IdAndSubIndicator_Id(
-                        request.getCampaignId(),
-                        request.getSubIndicatorId()
-                );
-
-        if (exists) {
-            throw new IllegalArgumentException(
-                    "Chỉ tiêu này đã được cấu hình trong đợt khám"
-            );
-        }
     }
 }
 

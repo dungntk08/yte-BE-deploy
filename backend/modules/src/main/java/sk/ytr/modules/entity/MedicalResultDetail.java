@@ -30,16 +30,34 @@ public class MedicalResultDetail extends BaseEntity {
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    /** Cấu hình chỉ tiêu khám tương ứng */
+    /** Kết quả Đợt khám mà học sinh tham gia */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "campaign_medical_config_id", nullable = false)
-    private CampaignMedicalConfig campaignMedicalConfig;
+    @JoinColumn(name = "campaign_id", nullable = false)
+    private MedicalCampaign campaign;
 
     /**
      * Giá trị kết quả khám (boolean)
      */
     @Column(name = "result_value")
     private Boolean resultValue;
+
+    /**
+     * Cấu hình chỉ tiêu nhóm khám
+     */
+    @Column(name = "medical_group_id")
+    private Long medicalGroupId;
+
+    /**
+     * Cấu hình chỉ tiêu nhóm khám
+     */
+    @Column(name = "medical_indicator_id")
+    private Long medicalIndicatorId;
+
+    /**
+     * Cấu hình chỉ tiêu nhóm khám
+     */
+    @Column(name = "medical_sub_indicator_id")
+    private Long medicalSubIndicatorId;
 
     /**
      * Cập nhật kết quả khám

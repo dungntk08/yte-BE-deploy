@@ -22,8 +22,15 @@ public class MedicalSubIndicatorServiceImpl implements MedicalSubIndicatorServic
     private final MedicalSubIndicatorRepository medicalSubIndicatorRepository;
     private final MedicalIndicatorRepository medicalIndicatorRepository;
     private final MedicalSubIndicatorServiceValidate medicalSubIndicatorServiceValidate;
+
+    /**
+     * Tạo mới chỉ số con cho chỉ tiêu khám.
+     *
+     * @param request DTO chứa thông tin chỉ số con cần tạo.
+     * @return DTO phản hồi chứa thông tin chỉ số con vừa được tạo.
+     */
     @Override
-    public MedicalSubIndicatorResponseDTO create(MedicalSubIndicatorRequestDTO request) {
+    public MedicalSubIndicatorResponseDTO createMedicalSubIndicator(MedicalSubIndicatorRequestDTO request) {
         try {
             medicalSubIndicatorServiceValidate.validateCreateRequest(request);
             MedicalIndicator indicator = medicalIndicatorRepository.findById(request.getIndicatorId())
@@ -39,8 +46,15 @@ public class MedicalSubIndicatorServiceImpl implements MedicalSubIndicatorServic
         }
     }
 
+    /**
+     * Cập nhật chỉ số con cho chỉ tiêu khám.
+     *
+     * @param id      ID của chỉ số con cần cập nhật.
+     * @param request DTO chứa thông tin mới của chỉ số con.
+     * @return DTO phản hồi chứa thông tin chỉ số con đã được cập nhật.
+     */
     @Override
-    public MedicalSubIndicatorResponseDTO update(Long id, MedicalSubIndicatorRequestDTO request) {
+    public MedicalSubIndicatorResponseDTO updateMedicalSubIndicator(Long id, MedicalSubIndicatorRequestDTO request) {
         try {
             medicalSubIndicatorServiceValidate.validateCreateRequest(request);
             MedicalSubIndicator entity = medicalSubIndicatorRepository.findById(id)
@@ -60,15 +74,26 @@ public class MedicalSubIndicatorServiceImpl implements MedicalSubIndicatorServic
         }
     }
 
+    /**
+     * Lấy thông tin chi tiết của một chỉ số con theo ID.
+     *
+     * @param id ID của chỉ số con.
+     * @return DTO phản hồi chứa thông tin chi tiết của chỉ số con.
+     */
     @Override
-    public MedicalSubIndicatorResponseDTO getById(Long id) {
+    public MedicalSubIndicatorResponseDTO getMedicalSubIndicatorById(Long id) {
         return medicalSubIndicatorRepository.findById(id)
                 .map(MedicalSubIndicatorResponseDTO::fromEntity)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chỉ số con"));
     }
 
+    /**
+     * Xóa một chỉ số con theo ID.
+     *
+     * @param id ID của chỉ số con cần xóa.
+     */
     @Override
-    public void delete(Long id) {
+    public void deleteMedicalSubIndicator(Long id) {
         try {
             medicalSubIndicatorRepository.deleteById(id);
         } catch (Exception e) {
@@ -77,8 +102,14 @@ public class MedicalSubIndicatorServiceImpl implements MedicalSubIndicatorServic
         }
     }
 
+    /**
+     * Lấy danh sách chỉ số con theo ID chỉ tiêu.
+     *
+     * @param indicatorId ID của chỉ tiêu.
+     * @return Danh sách DTO phản hồi chứa thông tin các chỉ số con thuộc chỉ tiêu.
+     */
     @Override
-    public List<MedicalSubIndicatorResponseDTO> getByIndicatorId(Long indicatorId) {
+    public List<MedicalSubIndicatorResponseDTO> getMedicalSubIndicatorByIndicatorId(Long indicatorId) {
         return medicalSubIndicatorRepository.findByIndicatorId(indicatorId)
                 .stream()
                 .map(MedicalSubIndicatorResponseDTO::fromEntity)

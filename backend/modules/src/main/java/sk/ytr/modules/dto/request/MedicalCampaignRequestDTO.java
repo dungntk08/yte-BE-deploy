@@ -3,6 +3,7 @@ package sk.ytr.modules.dto.request;
 import jakarta.persistence.Entity;
 import lombok.*;
 import sk.ytr.modules.constant.CampaignStatusEnum;
+import sk.ytr.modules.entity.CampaignMedicalConfig;
 
 import java.util.Date;
 
@@ -42,4 +43,7 @@ public class MedicalCampaignRequestDTO {
 
     /** tổng số học sinh được khám*/
     private Integer totalStudentsExamined;
+
+    /** Cấu hình chỉ tiêu khám áp dụng cho đợt khám*/
+    private CampaignMedicalConfig campaignMedicalConfig;
 }

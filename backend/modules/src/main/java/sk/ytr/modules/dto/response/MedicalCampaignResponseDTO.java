@@ -2,6 +2,7 @@ package sk.ytr.modules.dto.response;
 
 import lombok.*;
 import sk.ytr.modules.constant.CampaignStatusEnum;
+import sk.ytr.modules.entity.CampaignMedicalConfig;
 import sk.ytr.modules.entity.MedicalCampaign;
 
 import java.util.Date;
@@ -46,6 +47,9 @@ public class MedicalCampaignResponseDTO {
     /** tổng số học sinh được khám*/
     private Integer totalStudentsExamined;
 
+    /** Cấu hình chỉ tiêu khám áp dụng cho đợt khám*/
+    private CampaignMedicalConfig campaignMedicalConfig;;
+
     public static MedicalCampaignResponseDTO fromEntity(MedicalCampaign entity) {
         return MedicalCampaignResponseDTO.builder()
                 .id(entity.getId())
@@ -58,6 +62,7 @@ public class MedicalCampaignResponseDTO {
                 .note(entity.getNote())
                 .totalStudents(entity.getTotalStudents())
                 .totalStudentsExamined(entity.getTotalStudentsExamined())
+                .campaignMedicalConfig(entity.getCampaignMedicalConfig())
                 .build();
     }
 }

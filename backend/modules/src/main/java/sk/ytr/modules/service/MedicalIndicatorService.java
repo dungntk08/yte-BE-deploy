@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface MedicalIndicatorService {
 
-    MedicalIndicatorResponseDTO create(MedicalIndicatorRequestDTO request);
+    MedicalIndicatorResponseDTO createMedicalIndicator(MedicalIndicatorRequestDTO request);
 
-    MedicalIndicatorResponseDTO update(Long id, MedicalIndicatorRequestDTO request);
+    MedicalIndicatorResponseDTO updateMedicalIndicator(Long id, MedicalIndicatorRequestDTO request);
 
-    List<MedicalIndicatorResponseDTO> getByGroup(Long groupId);
+    List<MedicalIndicatorResponseDTO> getMedicalIndicatorByGroupId(Long groupId);
 
-    void delete(Long id);
+    void deleteMedicalIndicator(Long id);
 }

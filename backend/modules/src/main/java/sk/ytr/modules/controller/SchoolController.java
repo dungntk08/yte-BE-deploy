@@ -19,12 +19,12 @@ public class SchoolController {
     @GetMapping("/{id}")
     public SchoolResponseDTO
     getById(@PathVariable Long id) {
-        return service.getById(id);
+        return service.getSchoolById(id);
     }
 
     @GetMapping
     public List<SchoolResponseDTO> getAll() {
-        return service.getAll();
+        return service.getAllSchool();
     }
 }
 

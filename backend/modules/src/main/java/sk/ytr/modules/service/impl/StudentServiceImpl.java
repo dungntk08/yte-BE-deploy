@@ -24,8 +24,14 @@ public class StudentServiceImpl implements StudentService {
     private final MedicalCampaignRepository medicalCampaignRepository;
     private final StudentServiceValidate studentServiceValidate;
 
+    /**
+     * Tạo mới một học sinh.
+     *
+     * @param request DTO chứa thông tin học sinh cần tạo.
+     * @return DTO phản hồi chứa thông tin học sinh vừa được tạo.
+     */
     @Override
-    public StudentResponseDTO create(StudentRequestDTO request) {
+    public StudentResponseDTO createStudent(StudentRequestDTO request) {
         try {
             studentServiceValidate.validateCreateRequest(request);
             MedicalCampaign campaign = medicalCampaignRepository.findById(request.getCampaignId())
@@ -45,8 +51,15 @@ public class StudentServiceImpl implements StudentService {
         }
     }
 
+    /**
+     * Cập nhật thông tin một học sinh.
+     *
+     * @param id      ID của học sinh cần cập nhật.
+     * @param request DTO chứa thông tin mới của học sinh.
+     * @return DTO phản hồi chứa thông tin học sinh đã được cập nhật.
+     */
     @Override
-    public StudentResponseDTO update(Long id, StudentRequestDTO request) {
+    public StudentResponseDTO updateStudent(Long id, StudentRequestDTO request) {
         try {
             studentServiceValidate.validateCreateRequest(request);
             Student student = studentRepository.findById(id)
@@ -64,15 +77,26 @@ public class StudentServiceImpl implements StudentService {
         }
     }
 
+    /**
+     * Lấy thông tin chi tiết của một học sinh theo ID.
+     *
+     * @param id ID của học sinh.
+     * @return DTO phản hồi chứa thông tin chi tiết của học sinh.
+     */
     @Override
-    public StudentResponseDTO getById(Long id) {
+    public StudentResponseDTO getStudentById(Long id) {
         return studentRepository.findById(id)
                 .map(StudentResponseDTO::fromEntity)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy học sinh"));
     }
 
+    /**
+     * Xóa một học sinh theo ID.
+     *
+     * @param id ID của học sinh cần xóa.
+     */
     @Override
-    public void delete(Long id) {
+    public void deleteStudent(Long id) {
         try {
             studentRepository.deleteById(id);
         } catch (Exception e) {
@@ -81,8 +105,14 @@ public class StudentServiceImpl implements StudentService {
         }
     }
 
+    /**
+     * Lấy danh sách học sinh theo ID đợt khám.
+     *
+     * @param campaignId ID của đợt khám.
+     * @return Danh sách DTO phản hồi chứa thông tin các học sinh trong đợt khám.
+     */
     @Override
-    public List<StudentResponseDTO> getByCampaignId(Long campaignId) {
+    public List<StudentResponseDTO> getStudentByCampaignId(Long campaignId) {
         return studentRepository.findByCampaignId(campaignId)
                 .stream()
                 .map(StudentResponseDTO::fromEntity)

@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface MedicalGroupService {
 
-    MedicalGroupResponseDTO create(MedicalGroupRequestDTO request);
+    MedicalGroupResponseDTO createMedicalGroup(MedicalGroupRequestDTO request);
 
-    MedicalGroupResponseDTO update(Long id, MedicalGroupRequestDTO request);
+    MedicalGroupResponseDTO updateMedicalGroup(Long id, MedicalGroupRequestDTO request);
 
-    List<MedicalGroupResponseDTO> getAll();
+    List<MedicalGroupResponseDTO> getAllMedicalGroup();
 
-    void delete(Long id);
+    void deleteMedicalGroup(Long id);
 }

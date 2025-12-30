@@ -23,8 +23,14 @@ public class MedicalIndicatorServiceImpl implements MedicalIndicatorService {
     private final MedicalGroupRepository groupRepository;
     private final MedicalIndicatorServiceValidate medicalIndicatorServiceValidate;
 
+    /**
+     * Tạo mới chỉ tiêu khám.
+     *
+     * @param request DTO chứa thông tin chỉ tiêu cần tạo.
+     * @return DTO phản hồi chứa thông tin chỉ tiêu vừa được tạo.
+     */
     @Override
-    public MedicalIndicatorResponseDTO create(MedicalIndicatorRequestDTO request) {
+    public MedicalIndicatorResponseDTO createMedicalIndicator(MedicalIndicatorRequestDTO request) {
         try {
             medicalIndicatorServiceValidate.validateCreateRequest(request);
             MedicalGroup group = groupRepository.findById(request.getGroupId())
@@ -46,8 +52,15 @@ public class MedicalIndicatorServiceImpl implements MedicalIndicatorService {
         }
     }
 
+    /**
+     * Cập nhật chỉ tiêu khám.
+     *
+     * @param id      ID của chỉ tiêu cần cập nhật.
+     * @param request DTO chứa thông tin mới của chỉ tiêu.
+     * @return DTO phản hồi chứa thông tin chỉ tiêu đã được cập nhật.
+     */
     @Override
-    public MedicalIndicatorResponseDTO update(Long id, MedicalIndicatorRequestDTO request) {
+    public MedicalIndicatorResponseDTO updateMedicalIndicator(Long id, MedicalIndicatorRequestDTO request) {
         try {
 
             medicalIndicatorServiceValidate.validateCreateRequest(request);
@@ -66,16 +79,27 @@ public class MedicalIndicatorServiceImpl implements MedicalIndicatorService {
         }
     }
 
+    /**
+     * Lấy danh sách chỉ tiêu khám theo nhóm.
+     *
+     * @param groupId ID của nhóm chỉ tiêu.
+     * @return danh sách DTO phản hồi chứa thông tin các chỉ tiêu trong nhóm.
+     */
     @Override
-    public List<MedicalIndicatorResponseDTO> getByGroup(Long groupId) {
+    public List<MedicalIndicatorResponseDTO> getMedicalIndicatorByGroupId(Long groupId) {
         return medicalIndicatorRepository.findByGroupId(groupId)
                 .stream()
                 .map(MedicalIndicatorResponseDTO::fromEntity)
                 .toList();
     }
 
+    /**
+     * Xóa chỉ tiêu khám theo ID.
+     *
+     * @param id ID của chỉ tiêu cần xóa.
+     */
     @Override
-    public void delete(Long id) {
+    public void deleteMedicalIndicator(Long id) {
         medicalIndicatorRepository.deleteById(id);
     }
 }

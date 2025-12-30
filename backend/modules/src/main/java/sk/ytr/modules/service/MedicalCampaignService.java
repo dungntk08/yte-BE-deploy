@@ -7,14 +7,16 @@ import java.util.List;
 
 public interface MedicalCampaignService {
 
-    MedicalCampaignResponseDTO create(MedicalCampaignRequestDTO request);
+    MedicalCampaignResponseDTO createMedicalCampaign(MedicalCampaignRequestDTO request);
 
-    MedicalCampaignResponseDTO update(Long id, MedicalCampaignRequestDTO request);
+    MedicalCampaignResponseDTO updateMedicalCampaign(Long id, MedicalCampaignRequestDTO request);
 
-    MedicalCampaignResponseDTO getById(Long id);
+    MedicalCampaignResponseDTO getMedicalCampaignById(Long id);
 
-    List<MedicalCampaignResponseDTO> getAll();
+    List<MedicalCampaignResponseDTO> getAllMedicalCampaign();
 
-    void delete(Long id);
+    void deleteMedicalCampaign(Long id);
+
+
 }
 

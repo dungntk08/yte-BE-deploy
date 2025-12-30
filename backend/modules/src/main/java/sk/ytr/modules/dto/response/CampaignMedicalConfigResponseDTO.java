@@ -16,25 +16,13 @@ public class CampaignMedicalConfigResponseDTO {
     /** ID cấu hình */
     private Long id;
 
-    /** Thông tin chỉ tiêu */
-    private MedicalIndicatorResponseDTO indicator;
-
-    /** Thông tin chỉ tiêu con */
-    private MedicalSubIndicatorResponseDTO subIndicator;
-
-    /** Bắt buộc nhập */
-    private Boolean isRequired;
-
     /** Thứ tự hiển thị */
-    private Integer displayOrder;
+    private String configName;
 
     public static CampaignMedicalConfigResponseDTO fromEntity(CampaignMedicalConfig entity) {
         return CampaignMedicalConfigResponseDTO.builder()
                 .id(entity.getId())
-                .indicator(MedicalIndicatorResponseDTO.fromEntity(entity.getSubIndicator().getIndicator()))
-                .subIndicator(MedicalSubIndicatorResponseDTO.fromEntity(entity.getSubIndicator()))
-                .isRequired(entity.getIsRequired())
-                .displayOrder(entity.getDisplayOrder())
+                .configName(entity.getConfigName())
                 .build();
     }
 }

@@ -21,23 +21,23 @@ public class MedicalGroupController {
     @PostMapping
     public MedicalGroupResponseDTO create(
             @RequestBody MedicalGroupRequestDTO request) {
-        return service.create(request);
+        return service.createMedicalGroup(request);
     }
 
     @PutMapping("/{id}")
     public MedicalGroupResponseDTO update(
             @PathVariable Long id,
             @RequestBody MedicalGroupRequestDTO request) {
-        return service.update(id, request);
+        return service.updateMedicalGroup(id, request);
     }
 
     @GetMapping
     public List<MedicalGroupResponseDTO> getAll() {
-        return service.getAll();
+        return service.getAllMedicalGroup();
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        service.delete(id);
+        service.deleteMedicalGroup(id);
     }
 }

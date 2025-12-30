@@ -7,13 +7,13 @@ import java.util.List;
 
 public interface StudentService {
 
-    StudentResponseDTO create(StudentRequestDTO request);
+    StudentResponseDTO createStudent(StudentRequestDTO request);
 
-    StudentResponseDTO update(Long id, StudentRequestDTO request);
+    StudentResponseDTO updateStudent(Long id, StudentRequestDTO request);
 
-    StudentResponseDTO getById(Long id);
+    StudentResponseDTO getStudentById(Long id);
 
-    void delete(Long id);
+    void deleteStudent(Long id);
 
-    List<StudentResponseDTO> getByCampaignId(Long campaignId);
+    List<StudentResponseDTO> getStudentByCampaignId(Long campaignId);
 }

@@ -20,26 +20,7 @@ public class CampaignMedicalConfig {
     @SequenceGenerator(name = "campaign_medical_config_seq", sequenceName = "campaign_medical_config_seq", allocationSize = 1)
     private Long id;
 
-    /** Đợt khám */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "campaign_id", nullable = false)
-    private MedicalCampaign campaign;
-
-    /** Chỉ tiêu khám */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "indicator_id", nullable = false)
-    private MedicalIndicator indicator;
-
-    /** Chỉ tiêu con (nullable nếu không có) */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sub_indicator_id")
-    private MedicalSubIndicator subIndicator;
-
     /** Bắt buộc nhập hay không */
-    @Column(name = "is_required")
-    private Boolean isRequired;
-
-    /** Thứ tự hiển thị */
-    @Column(name = "display_order")
-    private Integer displayOrder;
+    @Column(name = "config_name")
+    private String configName;
 }

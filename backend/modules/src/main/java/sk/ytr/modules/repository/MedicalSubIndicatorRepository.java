@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface MedicalSubIndicatorRepository extends JpaRepository<MedicalSubIndicator, Long> {
     List<MedicalSubIndicator> findByIndicatorId(Long indicatorId);
+    List<MedicalSubIndicator> findByIndicatorIdIn(List<Long> indicatorId);
     boolean existsByIndicator_IdAndSubCode(Long indicatorId, String subCode);
     boolean existsByIndicator_IdAndSubName(Long indicatorId, String subName);
 }

@@ -1,8 +1,7 @@
 package sk.ytr.modules.dto.request;
 
-import jakarta.persistence.Entity;
 import lombok.*;
-import sk.ytr.modules.entity.CampaignMedicalConfig;
+import sk.ytr.modules.entity.MedicalCampaign;
 import sk.ytr.modules.entity.MedicalResultDetail;
 import sk.ytr.modules.entity.Student;
 
@@ -22,25 +21,41 @@ public class MedicalResultDetailRequestDTO {
     private Long studentId;
 
     /**
-     * ID cấu hình chỉ tiêu khám
+     * Cấu hình chỉ tiêu nhóm khám
      */
-    private Long campaignMedicalConfigId;
+    private Long medicalGroupId;
+
+    /**
+     * Cấu hình chỉ tiêu nhóm khám
+     */
+    private Long medicalIndicatorId;
+
+    /**
+     * Cấu hình chỉ tiêu nhóm khám
+     */
+    private Long medicalSubIndicatorId;
 
     /**
      * Giá trị kết quả (true/false hoặc chi tiết JSON)
      */
     private Object resultValue;
 
+    /** Kết quả Đợt khám mà học sinh tham gia */
+    private MedicalCampaign campaign;
+
     /**
      * Convert RequestDTO → Entity
      */
     public MedicalResultDetail toEntity(
             Student student,
-            CampaignMedicalConfig config
+            MedicalResultDetailRequestDTO request
     ) {
         return MedicalResultDetail.builder()
                 .student(student)
-                .campaignMedicalConfig(config)
+                .medicalGroupId(request.getMedicalGroupId())
+                .medicalIndicatorId(request.getMedicalIndicatorId())
+                .medicalSubIndicatorId(request.getMedicalSubIndicatorId())
+                .campaign(request.getCampaign())
                 .resultValue(convertResultValue())
                 .build();
     }

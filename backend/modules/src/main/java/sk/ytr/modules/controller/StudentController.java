@@ -20,29 +20,29 @@ public class StudentController {
     @PostMapping
     public StudentResponseDTO create(
             @RequestBody StudentRequestDTO request) {
-        return service.create(request);
+        return service.createStudent(request);
     }
 
     @PutMapping("/{id}")
     public StudentResponseDTO update(
             @PathVariable Long id,
             @RequestBody StudentRequestDTO request) {
-        return service.update(id, request);
+        return service.updateStudent(id, request);
     }
 
     @GetMapping("/{id}")
     public StudentResponseDTO getById(@PathVariable Long id) {
-        return service.getById(id);
+        return service.getStudentById(id);
     }
 
     @GetMapping("/campaign/{campaignId}")
     public List<StudentResponseDTO> getByCampaignId(
             @PathVariable Long campaignId) {
-        return service.getByCampaignId(campaignId);
+        return service.getStudentByCampaignId(campaignId);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        service.delete(id);
+        service.deleteStudent(id);
     }
 }

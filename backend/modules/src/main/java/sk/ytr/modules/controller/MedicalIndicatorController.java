@@ -21,24 +21,24 @@ public class MedicalIndicatorController {
     @PostMapping
     public MedicalIndicatorResponseDTO create(
             @RequestBody MedicalIndicatorRequestDTO request) {
-        return service.create(request);
+        return service.createMedicalIndicator(request);
     }
 
     @PutMapping("/{id}")
     public MedicalIndicatorResponseDTO update(
             @PathVariable Long id,
             @RequestBody MedicalIndicatorRequestDTO request) {
-        return service.update(id, request);
+        return service.updateMedicalIndicator(id, request);
     }
 
     @GetMapping("/group/{groupId}")
     public List<MedicalIndicatorResponseDTO> getByGroup(
             @PathVariable Long groupId) {
-        return service.getByGroup(groupId);
+        return service.getMedicalIndicatorByGroupId(groupId);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        service.delete(id);
+        service.deleteMedicalIndicator(id);
     }
 }

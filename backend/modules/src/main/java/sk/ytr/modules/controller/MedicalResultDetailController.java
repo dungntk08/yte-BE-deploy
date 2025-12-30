@@ -21,29 +21,29 @@ public class MedicalResultDetailController {
     @PostMapping
     public MedicalResultDetailResponseDTO create(
             @RequestBody MedicalResultDetailRequestDTO request) {
-        return service.create(request);
+        return service.createMedicalResultDetail(request);
     }
 
     @PutMapping("/{id}")
     public MedicalResultDetailResponseDTO update(
             @PathVariable Long id,
             @RequestBody MedicalResultDetailRequestDTO request) {
-        return service.update(id, request);
+        return service.updateMedicalResultDetail(id, request);
     }
 
     @GetMapping("/{id}")
     public MedicalResultDetailResponseDTO getById(@PathVariable Long id) {
-        return service.getById(id);
+        return service.getMedicalResultDetailById(id);
     }
 
     @GetMapping("/student/{studentId}")
     public List<MedicalResultDetailResponseDTO> getByStudentId(
             @PathVariable Long studentId) {
-        return service.getByStudentId(studentId);
+        return service.getMedicalResultDetailByStudentId(studentId);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        service.delete(id);
+        service.deleteMedicalResultDetail(id);
     }
 }

@@ -1,11 +1,13 @@
 package sk.ytr.modules.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import sk.ytr.modules.dto.request.CampaignMedicalConfigRequestDTO;
+import sk.ytr.modules.dto.request.CampaignMedicalConfigSubRequestDTO;
 import sk.ytr.modules.dto.response.CampaignMedicalConfigResponseDTO;
+import sk.ytr.modules.dto.response.CampaignMedicalConfigSubResponseDTO;
 import sk.ytr.modules.service.CampaignMedicalConfigService;
 
 import java.util.List;
@@ -14,36 +16,78 @@ import java.util.List;
 @RequestMapping("/api/campaign-medical-configs")
 @CrossOrigin
 @Slf4j
+@RequiredArgsConstructor
 public class CampaignMedicalConfigController {
 
-    private CampaignMedicalConfigService service;
+    private final CampaignMedicalConfigService service;
 
     @PostMapping
     public CampaignMedicalConfigResponseDTO create(
             @RequestBody CampaignMedicalConfigRequestDTO request) {
-        return service.create(request);
+        return service.createCampaignMedicalConfig(request);
     }
 
     @PutMapping("/{id}")
     public CampaignMedicalConfigResponseDTO update(
             @PathVariable Long id,
             @RequestBody CampaignMedicalConfigRequestDTO request) {
-        return service.update(id, request);
+        return service.updateCampaignMedicalConfig(id, request);
     }
 
     @GetMapping("/{id}")
     public CampaignMedicalConfigResponseDTO getById(@PathVariable Long id) {
-        return service.getById(id);
-    }
-
-    @GetMapping("/campaign/{campaignId}")
-    public List<CampaignMedicalConfigResponseDTO> getByCampaignId(
-            @PathVariable Long campaignId) {
-        return service.getByCampaignId(campaignId);
+        return service.getCampaignMedicalConfigById(id);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        service.delete(id);
+        service.deleteCampaignMedicalConfig(id);
+    }
+
+    /**
+     * Tạo mới cấu hình nhóm chỉ tiêu khám
+     */
+    @PostMapping("/createCampaignMedicalConfigSub")
+    public CampaignMedicalConfigSubResponseDTO createCampaignMedicalConfigSub(
+            @RequestBody CampaignMedicalConfigSubRequestDTO request) {
+
+        return service.createCampaignMedicalConfigSub(request);
+    }
+
+    /**
+     * Cập nhật cấu hình nhóm chỉ tiêu khám
+     */
+    @PutMapping("updateCampaignMedicalConfigSub/{id}")
+    public CampaignMedicalConfigSubResponseDTO updateCampaignMedicalConfigSub(
+            @PathVariable Long id,
+            @Valid @RequestBody CampaignMedicalConfigSubRequestDTO request) {
+
+        return service.updateCampaignMedicalConfigSub(id, request);
+    }
+
+    /**
+     * Lấy chi tiết cấu hình nhóm chỉ tiêu theo ID
+     */
+    @GetMapping("getCampaignMedicalConfigSubById/{id}")
+    public CampaignMedicalConfigSubResponseDTO getCampaignMedicalConfigSubById(@PathVariable Long id) {
+        return service.getCampaignMedicalConfigSubById(id);
+    }
+
+    /**
+     * Lấy danh sách cấu hình nhóm chỉ tiêu theo cấu hình đợt khám
+     */
+    @GetMapping("getByCampaignMedicalConfigId/config/{campaignMedicalConfigId}")
+    public List<CampaignMedicalConfigSubResponseDTO> getByCampaignMedicalConfigId(
+            @PathVariable Long campaignMedicalConfigId) {
+
+        return service.getByCampaignMedicalConfigId(campaignMedicalConfigId);
+    }
+
+    /**
+     * Xóa cấu hình nhóm chỉ tiêu khám
+     */
+    @DeleteMapping("deleteCampaignMedicalConfigSub/{id}")
+    public void deleteCampaignMedicalConfigSub(@PathVariable Long id) {
+        service.deleteCampaignMedicalConfigSub(id);
     }
 }

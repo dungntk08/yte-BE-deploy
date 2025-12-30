@@ -20,29 +20,29 @@ public class MedicalSubIndicatorController {
     @PostMapping
     public MedicalSubIndicatorResponseDTO create(
             @RequestBody MedicalSubIndicatorRequestDTO request) {
-        return service.create(request);
+        return service.createMedicalSubIndicator(request);
     }
 
     @PutMapping("/{id}")
     public MedicalSubIndicatorResponseDTO update(
             @PathVariable Long id,
             @RequestBody MedicalSubIndicatorRequestDTO request) {
-        return service.update(id, request);
+        return service.updateMedicalSubIndicator(id, request);
     }
 
     @GetMapping("/{id}")
     public MedicalSubIndicatorResponseDTO getById(@PathVariable Long id) {
-        return service.getById(id);
+        return service.getMedicalSubIndicatorById(id);
     }
 
     @GetMapping("/indicator/{indicatorId}")
     public List<MedicalSubIndicatorResponseDTO> getByIndicatorId(
             @PathVariable Long indicatorId) {
-        return service.getByIndicatorId(indicatorId);
+        return service.getMedicalSubIndicatorByIndicatorId(indicatorId);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        service.delete(id);
+        service.deleteMedicalSubIndicator(id);
     }
 }

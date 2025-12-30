@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface SchoolService {
 
-    SchoolResponseDTO getById(Long id);
+    SchoolResponseDTO getSchoolById(Long id);
 
-    List<SchoolResponseDTO> getAll();
+    List<SchoolResponseDTO> getAllSchool();
 }

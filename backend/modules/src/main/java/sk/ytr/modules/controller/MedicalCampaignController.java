@@ -20,28 +20,28 @@ public class MedicalCampaignController {
     @PostMapping
     public MedicalCampaignResponseDTO create(
             @RequestBody MedicalCampaignRequestDTO request) {
-        return service.create(request);
+        return service.createMedicalCampaign(request);
     }
 
     @PutMapping("/{id}")
     public MedicalCampaignResponseDTO update(
             @PathVariable Long id,
             @RequestBody MedicalCampaignRequestDTO request) {
-        return service.update(id, request);
+        return service.updateMedicalCampaign(id, request);
     }
 
     @GetMapping("/{id}")
     public MedicalCampaignResponseDTO getById(@PathVariable Long id) {
-        return service.getById(id);
+        return service.getMedicalCampaignById(id);
     }
 
     @GetMapping
     public List<MedicalCampaignResponseDTO> getAll() {
-        return service.getAll();
+        return service.getAllMedicalCampaign();
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        service.delete(id);
+        service.deleteMedicalCampaign(id);
     }
 }

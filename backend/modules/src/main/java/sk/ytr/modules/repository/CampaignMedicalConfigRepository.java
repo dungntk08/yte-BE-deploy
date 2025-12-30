@@ -7,6 +7,4 @@ import sk.ytr.modules.entity.CampaignMedicalConfig;
 import java.util.List;
 
 public interface CampaignMedicalConfigRepository extends JpaRepository<CampaignMedicalConfig, Long> {
-    List<CampaignMedicalConfig> findByCampaignId(Long campaignId);
-    boolean existsByCampaign_IdAndSubIndicator_Id(Long campaignId, Long subIndicatorId);
 }

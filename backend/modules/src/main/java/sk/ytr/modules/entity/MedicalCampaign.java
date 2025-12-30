@@ -63,4 +63,11 @@ public class MedicalCampaign extends BaseEntity {
     /** tổng số học sinh được khám*/
     @Column(name = "total_students_examined")
     private Integer totalStudentsExamined;
+
+    /**
+     * Cấu hình chỉ tiêu khám áp dụng cho đợt khám
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "campaign_medical_config_id", nullable = false)
+    private CampaignMedicalConfig campaignMedicalConfig;
 }

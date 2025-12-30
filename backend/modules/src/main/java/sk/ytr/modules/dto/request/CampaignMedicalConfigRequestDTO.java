@@ -13,18 +13,6 @@ import lombok.*;
 @Builder
 public class CampaignMedicalConfigRequestDTO {
 
-    /** ID đợt khám */
-    private Long campaignId;
-
-    /** ID chỉ tiêu */
-    private Long indicatorId;
-
-    /** ID chỉ tiêu con (nullable) */
-    private Long subIndicatorId;
-
-    /** Bắt buộc nhập hay không */
-    private Boolean isRequired;
-
     /** Thứ tự hiển thị */
-    private Integer displayOrder;
+    private String configName;
 }
