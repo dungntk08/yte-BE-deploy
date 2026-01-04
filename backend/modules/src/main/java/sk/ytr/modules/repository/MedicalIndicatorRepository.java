@@ -8,6 +8,7 @@ import sk.ytr.modules.dto.response.MedicalIndicatorResponseDTO;
 import sk.ytr.modules.entity.MedicalIndicator;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MedicalIndicatorRepository extends JpaRepository<MedicalIndicator, Long> {
     List<MedicalIndicator> findByGroupId(Long groupId);
@@ -29,4 +30,8 @@ public interface MedicalIndicatorRepository extends JpaRepository<MedicalIndicat
     List<MedicalIndicator> findIndicatorsByCampaignMedicalConfigId(
             @Param("campaignMedicalConfigId") Long campaignMedicalConfigId
     );
+
+    List<MedicalIndicator> findByGroup_IdOrderByDisplayOrderAsc(Long id);
+
+    Optional<MedicalIndicator> findByIndicatorNameAndGroupId(String indicatorName, Long id);
 }

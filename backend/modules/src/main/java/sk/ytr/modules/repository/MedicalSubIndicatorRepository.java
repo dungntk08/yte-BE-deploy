@@ -7,6 +7,7 @@ import sk.ytr.modules.dto.response.MedicalSubIndicatorResponseDTO;
 import sk.ytr.modules.entity.MedicalSubIndicator;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MedicalSubIndicatorRepository extends JpaRepository<MedicalSubIndicator, Long> {
     List<MedicalSubIndicator> findByIndicatorId(Long indicatorId);
@@ -16,4 +17,8 @@ public interface MedicalSubIndicatorRepository extends JpaRepository<MedicalSubI
     @Query(value = "SELECT * FROM medical_sub_indicator WHERE campaign_medical_config_id = :campaignMedicalConfigId ORDER BY display_order ASC",
             nativeQuery = true)
     List<MedicalSubIndicator> findByCampaignMedicalConfigIdOrderByDisplayOrderAsc(@Param("campaignMedicalConfigId") Long campaignMedicalConfigId);
+
+    List<MedicalSubIndicator> findByIndicator_IdOrderByDisplayOrderAsc(Long id);
+
+    Optional<MedicalSubIndicator> findBySubNameAndIndicatorId(String subIndicatorName, Long id);
 }

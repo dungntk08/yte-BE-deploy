@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bien_ban_thong_nhat_kham_hs" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="11111111-2222-3333-4444-555555555555">
+    <subDataset name="DiseaseDataset" uuid="aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee">
+        <field name="diseaseName" class="java.lang.String"/>
+        <field name="totalCase" class="java.lang.Integer"/>
+    </subDataset>
+    <parameter name="P_SCHOOL_NAME" class="java.lang.String"/>
+    <parameter name="P_TOTAL_CLASS" class="java.lang.Integer"/>
+    <parameter name="P_TOTAL_STUDENT" class="java.lang.Integer"/>
+    <parameter name="P_TOTAL_STUDENT_EXAM" class="java.lang.Integer"/>
+    <parameter name="P_EXAM_RATE" class="java.lang.String"/>
+    <parameter name="P_SCHOOL_YEAR" class="java.lang.String"/>
+    <parameter name="P_NUTRITION_UNDERWEIGHT" class="java.lang.Integer"/>
+    <parameter name="P_NUTRITION_OVERWEIGHT" class="java.lang.Integer"/>
+    <parameter name="P_NUTRITION_OBESE" class="java.lang.Integer"/>
+    <parameter name="P_DISEASE_DATA" class="net.sf.jasperreports.engine.JRDataSource"/>
+    <title>
+        <band height="150">
+            <staticText>
+                <reportElement x="0" y="0" width="250" height="20" uuid="ebc5fe75-a34c-4387-85f8-b6061c1c036e"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Times New Roman" size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[UBND PHƯỜNG BỒ ĐỀ]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="20" width="250" height="20" uuid="782d7753-edc8-40c1-9517-d543390951dc"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Times New Roman" size="11" isBold="true" isItalic="false" isUnderline="true"/>
+                </textElement>
+                <text><![CDATA[TRẠM Y TẾ]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="250" y="0" width="259" height="20" uuid="bf3635e7-60c0-42c6-abe7-eca75ed0ca94"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Times New Roman" size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="250" y="20" width="258" height="20" uuid="d7021887-8d21-45d9-bd96-505fa21040f7"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Times New Roman" size="11" isBold="true" isUnderline="true"/>
+                </textElement>
+                <text><![CDATA[Độc lập - Tự do - Hạnh phúc]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="305" y="40" width="250" height="10" uuid="9cebce3d-21fd-4908-8b4a-5b5f79aa4d02"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Times New Roman" size="11"/>
+                </textElement>
+                <text><![CDATA[-------------------------]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="40" y="70" width="478" height="25" uuid="0e444e42-415d-479b-b575-12181eac94ac"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Times New Roman" size="14" isBold="true"/>
+                </textElement>
+                <text><![CDATA[BIÊN BẢN]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="40" y="95" width="478" height="25" uuid="2761889e-a0f6-4a46-8b15-50100e0c69d4"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Times New Roman" size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Thống nhất kết quả khám, kiểm tra sức khỏe học sinh]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="40" y="120" width="478" height="25" uuid="9aac9826-1f26-4f48-b325-77ffbeb722b0"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Times New Roman" size="12" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Năm học " + $P{P_SCHOOL_YEAR}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+    <detail>
+        <band height="420">
+            <textField>
+                <reportElement x="40" y="0" width="478" height="20" uuid="ca6edef6-65ec-467c-892c-b7e49aaffd57"/>
+                <textElement>
+                    <font fontName="Times New Roman" size="11"/>
+                </textElement>
+                <textFieldExpression><![CDATA["1. Tên trường: " + $P{P_SCHOOL_NAME}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="40" y="25" width="478" height="20" uuid="5a7c51f3-ea07-4d93-87c3-6c80b8326539"/>
+                <textElement>
+                    <font fontName="Times New Roman" size="11"/>
+                </textElement>
+                <textFieldExpression><![CDATA["2. Tổng số lớp: " + $P{P_TOTAL_CLASS} + " lớp"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="40" y="50" width="479" height="20" uuid="d7e7fcee-4252-4beb-9a7b-23f3755c9bf1"/>
+                <textElement>
+                    <font fontName="Times New Roman" size="11"/>
+                </textElement>
+                <textFieldExpression><![CDATA["3. Tổng số học sinh: " + $P{P_TOTAL_STUDENT} + " học sinh"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="40" y="75" width="515" height="20" uuid="3b75b6ef-12d8-4ad7-ad0c-d7eaceda23d1"/>
+                <textElement>
+                    <font fontName="Times New Roman" size="11"/>
+                </textElement>
+                <textFieldExpression><![CDATA["4. Tổng số học sinh được khám: "
+                    + $P{P_TOTAL_STUDENT_EXAM}
+                    + " (Tỷ lệ đạt: "
+                    + $P{P_EXAM_RATE}
+                    + ")"]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="40" y="110" width="515" height="20" uuid="6ed0f5c8-ef0e-499b-9673-d480317fe377"/>
+                <textElement>
+                    <font fontName="Times New Roman" size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[* Trong đó:]]></text>
+            </staticText>
+            <componentElement>
+                <reportElement x="40" y="140" width="479" height="150" uuid="44c825d6-9080-4f2a-8e53-ef025a73facf"/>
+                <jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+                    <datasetRun subDataset="DiseaseDataset" uuid="8dbf6390-cccb-4fb6-a1a4-8cac98d4c15e">
+                        <dataSourceExpression><![CDATA[$P{P_DISEASE_DATA}]]></dataSourceExpression>
+                    </datasetRun>
+                    <jr:column width="400" uuid="79f8b9a8-1825-48bd-9b83-313f5c96bc9c">
+                        <jr:columnHeader height="25">
+                            <staticText>
+                                <reportElement x="0" y="0" width="400" height="25" uuid="efc8838a-91fa-46c2-9d4e-a1f995a7bc30"/>
+                                <textElement textAlignment="Center">
+                                    <font fontName="Times New Roman" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Tên bệnh]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField>
+                                <reportElement x="0" y="0" width="400" height="20" uuid="4e91c610-67d6-411b-a0b3-daffc6758a2f"/>
+                                <textElement>
+                                    <font fontName="Times New Roman"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{diseaseName}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                    <jr:column width="155" uuid="87627f34-329f-46c7-b24b-aba3aff847d9">
+                        <jr:columnHeader height="25">
+                            <staticText>
+                                <reportElement x="0" y="0" width="155" height="25" uuid="1604f9be-4b68-416b-b575-cfa7c93a08e2"/>
+                                <textElement textAlignment="Center">
+                                    <font fontName="Times New Roman" isBold="true"/>
+                                </textElement>
+                                <text><![CDATA[Số mắc]]></text>
+                            </staticText>
+                        </jr:columnHeader>
+                        <jr:detailCell height="20">
+                            <textField>
+                                <reportElement x="0" y="0" width="155" height="20" uuid="0aeed9b6-63a8-4a76-a743-b91e32963b62"/>
+                                <textElement textAlignment="Center">
+                                    <font fontName="Times New Roman"/>
+                                </textElement>
+                                <textFieldExpression><![CDATA[$F{totalCase}]]></textFieldExpression>
+                            </textField>
+                        </jr:detailCell>
+                    </jr:column>
+                </jr:table>
+            </componentElement>
+            <staticText>
+                <reportElement x="40" y="310" width="479" height="20" uuid="20a0cc2c-eb86-4404-9d5a-233b556efcf4"/>
+                <textElement>
+                    <font fontName="Times New Roman" size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[* Tình trạng dinh dưỡng:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="40" y="335" width="479" height="20" uuid="61665439-bc31-4516-a958-e4c632911ac7"/>
+                <textElement>
+                    <font fontName="Times New Roman"/>
+                </textElement>
+                <textFieldExpression><![CDATA["- Nhẹ cân, thấp còi: " + $P{P_NUTRITION_UNDERWEIGHT}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="40" y="360" width="479" height="20" uuid="786a1636-d325-43f0-aec6-b367cfd27e4c"/>
+                <textElement>
+                    <font fontName="Times New Roman"/>
+                </textElement>
+                <textFieldExpression><![CDATA["- Thừa cân: " + $P{P_NUTRITION_OVERWEIGHT}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="40" y="385" width="479" height="20" uuid="e74dc303-878d-4a0c-895e-aaab5c3679c3"/>
+                <textElement>
+                    <font fontName="Times New Roman"/>
+                </textElement>
+                <textFieldExpression><![CDATA["- Béo phì: " + $P{P_NUTRITION_OBESE}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+    <summary>
+        <band height="140">
+            <staticText>
+                <reportElement x="350" y="10" width="168" height="20" uuid="44a63633-f81b-4b40-882d-290e41f024ef"/>
+                <textElement textAlignment="Left">
+                    <font fontName="Times New Roman" size="11"/>
+                </textElement>
+                <text><![CDATA[Ngày     tháng     năm 20]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="40" y="30" width="210" height="20" uuid="4fc6a034-2fbc-4feb-99af-7a07d6a21aea"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Times New Roman" size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[TM. BAN GIÁM HIỆU TRƯỜNG]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="305" y="30" width="214" height="20" uuid="49befd57-6d9c-4040-a8dd-99b1b308f283"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Times New Roman" size="11" isBold="true"/>
+                </textElement>
+                <text><![CDATA[TM. ĐOÀN KHÁM]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="40" y="60" width="210" height="20" uuid="e29dae95-b95a-4905-9e66-6215deefe022"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Times New Roman" size="10" isItalic="true"/>
+                </textElement>
+                <text><![CDATA[(Ký, ghi rõ họ tên)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="305" y="60" width="214" height="20" uuid="10891893-20a3-453e-b11f-0320433e3b91"/>
+                <textElement textAlignment="Center">
+                    <font fontName="Times New Roman" size="10" isItalic="true"/>
+                </textElement>
+                <text><![CDATA[(Ký, ghi rõ họ tên)]]></text>
+            </staticText>
+        </band>
+    </summary>
+</jasperReport>
