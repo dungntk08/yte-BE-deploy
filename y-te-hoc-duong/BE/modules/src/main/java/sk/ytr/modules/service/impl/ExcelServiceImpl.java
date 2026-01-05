@@ -16,9 +16,11 @@ import sk.ytr.modules.dto.excel.IndicatorHeaderMeta;
 import sk.ytr.modules.entity.*;
 import sk.ytr.modules.repository.*;
 import sk.ytr.modules.service.ExcelService;
+import sk.ytr.modules.utils.DateUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -259,10 +261,10 @@ public class ExcelServiceImpl implements ExcelService {
                     .orElseThrow(() -> new RuntimeException("Campaign không tồn tại"));
 
             // Load all students of campaign
-            Map<Long, Student> studentMap =
+            Map<String, Student> studentMap =
                     studentRepository.findByCampaignId(campaignId)
                             .stream()
-                            .collect(Collectors.toMap(Student::getId, Function.identity()));
+                            .collect(Collectors.toMap(Student::getIdentityNumber, Function.identity()));
 
             //Load all existing result details of campaign
             Map<String, MedicalResultDetail> existingMap =
@@ -277,18 +279,38 @@ public class ExcelServiceImpl implements ExcelService {
 
             // Skip header (3 rows)
             for (int i = 5; i <= sheet.getLastRowNum(); i++) {
-
                 Row row = sheet.getRow(i);
-                if (row == null) continue;
+                if (row == null && row.getCell(1) == null && row.getCell(2) == null ) continue;
 
-                Long studentId = getLongCellValue(row.getCell(1));
-                if (studentId == null) continue;
+                String studentIdentityNumber = String.valueOf(row.getCell(6));
+                if (studentIdentityNumber == null && !studentIdentityNumber.isEmpty()) continue;
 
-                Student student = studentMap.get(studentId);
-                if (student == null) {
-                    throw new RuntimeException("Học sinh không thuộc campaign: " + studentId);
+                Student student = studentMap.get(studentIdentityNumber);
+                if (student == null && !studentIdentityNumber.isEmpty()) {
+                    Student newStudent = new Student();
+                    newStudent.setUpdatedBy("ADMIN");
+                    newStudent.setCreatedBy("ADMIN");
+                    newStudent.setCreatedDate(DateUtils.getNow());
+                    newStudent.setModifiedDate(DateUtils.getNow());
+                    newStudent.setCampaign(campaign);
+                    newStudent.setIdentityNumber(studentIdentityNumber);
+                    newStudent.setFullName(getStringCell(row.getCell(1)));
+                    newStudent.setDob(DateUtils.convertStringToDate(getStringCell(row.getCell(2))));
+                    if(getStringCell(row.getCell(3)) == null || getStringCell(row.getCell(3)).isEmpty()){
+                        newStudent.setGender(GenderTypeEnum.FEMALE);
+                    }
+                    else{
+                        newStudent.setGender(GenderTypeEnum.MALE);
+                    }
+                    newStudent.setAddress(getStringCell(row.getCell(5)));
+                    newStudent.setHeight( getNumericCellValueAsBigDecimal(row.getCell(8)) );
+                    newStudent.setWeight( getNumericCellValueAsBigDecimal(row.getCell(7)) );
+                    student = studentRepository.save(newStudent);
+                    studentMap.put(studentIdentityNumber, newStudent);
                 }
-
+                if(student == null ) {
+                    continue;
+                }
                 // Dynamic columns
                 for (Map.Entry<Integer, IndicatorHeaderMeta> entry : headerMetaMap.entrySet()) {
 
@@ -296,22 +318,23 @@ public class ExcelServiceImpl implements ExcelService {
                     if (cell == null) continue;
 
                     Boolean value = parseBooleanCell(cell);
-                    if (value == null) continue;
+                    if (value == null) value = false;
 
                     IndicatorHeaderMeta meta = entry.getValue();
 
                     String key = buildKeyForImport(
-                            studentId,
+                            studentIdentityNumber,
                             campaignId,
                             meta.getGroupId(),
                             meta.getIndicatorId(),
                             meta.getSubIndicatorId()
                     );
 
+                    Student finalStudent = student;
                     MedicalResultDetail detail =
                             existingMap.computeIfAbsent(key, k -> {
                                 MedicalResultDetail d = new MedicalResultDetail();
-                                d.setStudent(student);
+                                d.setStudent(finalStudent);
                                 d.setCampaign(campaign);
                                 d.setMedicalGroupId(meta.getGroupId());
                                 d.setMedicalIndicatorId(meta.getIndicatorId());
@@ -614,7 +637,7 @@ public class ExcelServiceImpl implements ExcelService {
 
     private String buildKeyForImport(MedicalResultDetail d) {
         return buildKeyForImport(
-                d.getStudent().getId(),
+                d.getStudent().getIdentityNumber(),
                 d.getCampaign().getId(),
                 d.getMedicalGroupId(),
                 d.getMedicalIndicatorId(),
@@ -623,13 +646,13 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private String buildKeyForImport(
-            Long studentId,
+            String studentIdentityNumber,
             Long campaignId,
             Long groupId,
             Long indicatorId,
             Long subIndicatorId
     ) {
-        return studentId + "|" + campaignId + "|" +
+        return studentIdentityNumber + "|" + campaignId + "|" +
                 groupId + "|" + indicatorId + "|" +
                 (subIndicatorId != null ? subIndicatorId : 0);
     }
@@ -644,9 +667,9 @@ public class ExcelServiceImpl implements ExcelService {
         // Row 1 → Indicator
         // Row 2 → Sub Indicator
 
-        Row groupRow = sheet.getRow(0);
-        Row indicatorRow = sheet.getRow(1);
-        Row subIndicatorRow = sheet.getRow(2);
+        Row groupRow = sheet.getRow(2);
+        Row indicatorRow = sheet.getRow(3);
+        Row subIndicatorRow = sheet.getRow(4);
 
         if (groupRow == null || indicatorRow == null) {
             throw new RuntimeException("Header Excel không hợp lệ");
@@ -654,7 +677,7 @@ public class ExcelServiceImpl implements ExcelService {
 
         Map<Integer, IndicatorHeaderMeta> result = new HashMap<>();
 
-        for (int col = 0; col <= groupRow.getLastCellNum(); col++) {
+        for (int col = 10; col <= groupRow.getLastCellNum(); col++) {
 
             String groupName = getStringCell(groupRow.getCell(col));
             String indicatorName = getStringCell(indicatorRow.getCell(col));
@@ -682,7 +705,7 @@ public class ExcelServiceImpl implements ExcelService {
 
             MedicalSubIndicator subIndicator = null;
 
-            if (subIndicatorName != null) {
+            if (subIndicatorName != null && !subIndicatorName.isEmpty()) {
                 subIndicator =
                         medicalSubIndicatorRepository
                                 .findBySubNameAndIndicatorId(subIndicatorName, indicator.getId())
@@ -705,21 +728,6 @@ public class ExcelServiceImpl implements ExcelService {
         }
 
         return result;
-    }
-
-    private String getStringCell(Cell cell) {
-        if (cell == null) return null;
-
-        try {
-            return switch (cell.getCellType()) {
-                case STRING -> cell.getStringCellValue().trim();
-                case NUMERIC -> String.valueOf((long) cell.getNumericCellValue());
-                case FORMULA -> cell.getStringCellValue().trim();
-                default -> null;
-            };
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     /**
@@ -1094,5 +1102,47 @@ public class ExcelServiceImpl implements ExcelService {
             return "";
         }
     }
+    private String getStringCell(Cell cell) {
+        if (cell == null) return null;
 
+        try {
+            return switch (cell.getCellType()) {
+                case STRING -> cell.getStringCellValue().trim();
+                case NUMERIC -> String.valueOf((long) cell.getNumericCellValue());
+                case FORMULA -> cell.getStringCellValue().trim();
+                default -> null;
+            };
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private BigDecimal getNumericCellValueAsBigDecimal(Cell cell) {
+        if (cell == null) return null;
+
+        try {
+            return switch (cell.getCellType()) {
+                case NUMERIC -> BigDecimal.valueOf(cell.getNumericCellValue());
+                case STRING -> {
+                    String value = cell.getStringCellValue().trim();
+                    if (value.isEmpty()) yield null;
+                    yield new BigDecimal(value);
+                }
+                case FORMULA -> {
+                    yield switch (cell.getCachedFormulaResultType()) {
+                        case NUMERIC -> BigDecimal.valueOf(cell.getNumericCellValue());
+                        case STRING -> {
+                            String v = cell.getStringCellValue().trim();
+                            if (v.isEmpty()) yield null;
+                            yield new BigDecimal(v);
+                        }
+                        default -> null;
+                    };
+                }
+                default -> null;
+            };
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

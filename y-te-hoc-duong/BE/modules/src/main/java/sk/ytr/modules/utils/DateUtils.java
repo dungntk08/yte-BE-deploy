@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @UtilityClass
@@ -149,5 +150,17 @@ public class DateUtils {
         return dateFormat.format(dateToConvert);
     }
 
+    public static Date convertStringToDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            return null;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate localDate = LocalDate.parse(dateStr.trim(), formatter);
+
+        return Date.from(localDate
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant());
+    }
 }
 
