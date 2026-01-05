@@ -376,16 +376,6 @@ export function StudentTable() {
           </div>
           <div>
             <label className="block text-sm text-gray-600 mb-1">
-              Lớp
-            </label>
-            <select className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
-              <option>Toàn trường</option>
-              <option>Lớp 2A</option>
-              <option>Lớp 2B</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">
               Tìm kiếm
             </label>
             <div className="flex-1 relative">

@@ -207,6 +207,20 @@ http://localhost:8088
 
 ---
 
+Sever swagger:
+
+
+
+```
+
+http://localhost:8088/swagger-ui/index.html
+
+```
+
+
+
+---
+
 
 
 \## 6. Import / Export Excel
