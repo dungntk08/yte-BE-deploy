@@ -4,9 +4,10 @@ import { useState } from 'react';
 interface ExamPeriodModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onRefresh?: () => void;
 }
 
-export function ExamPeriodModal({ isOpen, onClose }: ExamPeriodModalProps) {
+export function ExamPeriodModal({ isOpen, onClose, onRefresh }: ExamPeriodModalProps) {
   if (!isOpen) return null;
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -51,6 +52,7 @@ export function ExamPeriodModal({ isOpen, onClose }: ExamPeriodModalProps) {
       examined_students: '',
       status: 'OPEN',
     });
+    if (onRefresh) onRefresh();
   };
 
   return (

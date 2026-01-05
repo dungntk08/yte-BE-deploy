@@ -1,6 +1,5 @@
 import { X } from 'lucide-react';
 import { useState } from 'react';
-import { HealthIndicatorsForm } from './HealthIndicatorsForm';
 
 interface AddStudentModalProps {
   isOpen: boolean;
@@ -17,86 +16,22 @@ export function AddStudentModal({ isOpen, onClose, onAdd }: AddStudentModalProps
     dob: '',
     address: '',
     identity_number: '',
-    weight: '',
-    height: '',
-    notify_family: '',
-  });
-
-  const [healthData, setHealthData] = useState({
-    sdd: false,
-    overweight: false,
-    obesity: false,
-    myopia_correct: false,
-    myopia_incorrect: false,
-    hyperopia: false,
-    astigmatism: false,
-    strabismus: false,
-    refractive_error: false,
-    vkm: false,
-    ear_infection: false,
-    hearing_loss: false,
-    nose_inflammation: false,
-    throat_inflammation: false,
-    cavities: false,
-    gingivitis: false,
-    malocclusion: false,
-    scoliosis: false,
-    flat_feet: false,
-    limb_deformity: false,
-    eczema: false,
-    fungal_infection: false,
-    skin_allergy: false,
-    anxiety: false,
-    depression: false,
-    behavioral_disorder: false,
-    heart_disease: false,
-    respiratory_disease: false,
-    digestive_disease: false,
+    student_code: '',
+    class: '',
   });
 
   const handleSubmit = () => {
-    onAdd({ ...formData, healthData });
+    onAdd(formData);
     setFormData({
       full_name: '',
       gender: 'Nam',
       dob: '',
       address: '',
       identity_number: '',
-      weight: '',
-      height: '',
-      notify_family: '',
+      student_code: '',
+      class: '',
     });
-    setHealthData({
-      sdd: false,
-      overweight: false,
-      obesity: false,
-      myopia_correct: false,
-      myopia_incorrect: false,
-      hyperopia: false,
-      astigmatism: false,
-      strabismus: false,
-      refractive_error: false,
-      vkm: false,
-      ear_infection: false,
-      hearing_loss: false,
-      nose_inflammation: false,
-      throat_inflammation: false,
-      cavities: false,
-      gingivitis: false,
-      malocclusion: false,
-      scoliosis: false,
-      flat_feet: false,
-      limb_deformity: false,
-      eczema: false,
-      fungal_infection: false,
-      skin_allergy: false,
-      anxiety: false,
-      depression: false,
-      behavioral_disorder: false,
-      heart_disease: false,
-      respiratory_disease: false,
-      digestive_disease: false,
-    });
+    onClose();
   };
 
   return (
@@ -189,47 +124,27 @@ export function AddStudentModal({ isOpen, onClose, onAdd }: AddStudentModalProps
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Cân nặng (kg)</label>
+                <label className="block text-sm text-gray-600 mb-1">Mã học sinh</label>
                 <input
-                  type="number"
-                  step="0.1"
-                  value={formData.weight}
-                  onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                  placeholder="Nhập cân nặng"
+                  type="text"
+                  value={formData.student_code}
+                  onChange={(e) => setFormData({ ...formData, student_code: e.target.value })}
+                  placeholder="Nhập mã học sinh"
                   className="w-full border border-gray-300 rounded px-3 py-2 text-sm placeholder:text-gray-400"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Chiều cao (cm)</label>
+                <label className="block text-sm text-gray-600 mb-1">Lớp học</label>
                 <input
-                  type="number"
-                  step="0.1"
-                  value={formData.height}
-                  onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                  placeholder="Nhập chiều cao"
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm placeholder:text-gray-400"
-                />
-              </div>
-              <div className="col-span-2">
-                <label className="block text-sm text-gray-600 mb-1">Thông báo gia đình</label>
-                <textarea
-                  value={formData.notify_family}
-                  onChange={(e) => setFormData({ ...formData, notify_family: e.target.value })}
-                  placeholder="Nhập thông báo gửi gia đình"
-                  rows={3}
+                  type="text"
+                  value={formData.class}
+                  onChange={(e) => setFormData({ ...formData, class: e.target.value })}
+                  placeholder="Nhập lớp học"
                   className="w-full border border-gray-300 rounded px-3 py-2 text-sm placeholder:text-gray-400"
                 />
               </div>
             </div>
           </div>
-
-          {/* Health Check Results */}
-          <HealthIndicatorsForm
-            formData={formData}
-            setFormData={setFormData}
-            healthData={healthData}
-            setHealthData={setHealthData}
-          />
         </div>
 
         {/* Footer */}

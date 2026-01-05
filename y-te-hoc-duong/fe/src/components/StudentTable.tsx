@@ -1,114 +1,14 @@
-import { useState } from 'react';
-import { Pencil, Eye, Trash2, FileDown, Plus, UserPlus, Search, ChevronDown, Settings, FileText } from 'lucide-react';
-import { EditStudentModal } from './EditStudentModal';
+import { Search, UserPlus, FileDown, Settings, FileText, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { AddStudentModal } from './AddStudentModal';
+import { EditStudentModal } from './EditStudentModal';
 import { ViewStudentModal } from './ViewStudentModal';
 import { ExamPeriodModal } from './ExamPeriodModal';
 import { HealthReportModal } from './HealthReportModal';
-
-interface Student {
-  id: string;
-  name: string;
-  citizenId: string;
-  studentCode: string;
-  birthDate: string;
-  gender: string;
-  class: string;
-  status: string;
-  healthData?: any;
-}
-
-const mockStudents: Student[] = [
-  { 
-    id: '1', 
-    name: 'Bùi Hoàng An', 
-    citizenId: '040223002938', 
-    studentCode: '2401079943', 
-    birthDate: '21/02/2022', 
-    gender: 'Nam', 
-    class: 'Lớp 2B', 
-    status: 'Đã khám',
-    healthData: {
-      weight: '25.5',
-      height: '120.0',
-      notify_family: 'Học sinh cần theo dõi thêm về tình trạng cận thị. Vui lòng đưa con đến bác sĩ nhãn khoa để kiểm tra chi tiết.',
-      overweight: true,
-      myopia_incorrect: true,
-    }
-  },
-  { 
-    id: '2', 
-    name: 'Bùi Lê Tuấn An', 
-    citizenId: '040323022278', 
-    studentCode: '', 
-    birthDate: '03/08/2023', 
-    gender: 'Nữ', 
-    class: 'Lớp 2A', 
-    status: 'Đã khám',
-    healthData: {
-      weight: '22.0',
-      height: '115.5',
-      notify_family: 'Học sinh có sâu răng, cần đến nha khoa để điều trị.',
-      cavities: true,
-      gingivitis: true,
-    }
-  },
-  { 
-    id: '3', 
-    name: 'Chu Nguyên Thục An', 
-    citizenId: '040320103687', 
-    studentCode: '2400708445', 
-    birthDate: '06/02/2021', 
-    gender: 'Nữ', 
-    class: 'Lớp 4C', 
-    status: 'Đã khám',
-    healthData: {
-      weight: '30.2',
-      height: '135.0',
-      notify_family: 'Học sinh khỏe mạnh, không có vấn đề sức khỏe đáng lưu ý.',
-    }
-  },
-  { 
-    id: '4', 
-    name: 'Dương Khánh An', 
-    citizenId: '040320010432', 
-    studentCode: '', 
-    birthDate: '26/08/2020', 
-    gender: 'Nữ', 
-    class: 'Lớp 5B', 
-    status: 'Đã khám',
-    healthData: {
-      weight: '28.0',
-      height: '130.5',
-      notify_family: 'Học sinh có viêm mũi mãn tính, cần theo dõi và điều trị.',
-      nose_inflammation: true,
-      throat_inflammation: true,
-    }
-  },
-  { 
-    id: '5', 
-    name: 'Hoàng Trường An', 
-    citizenId: '040218001792', 
-    studentCode: '4092834698', 
-    birthDate: '01/08/2018', 
-    gender: 'Nam', 
-    class: 'Lớp 2A', 
-    status: 'Đã khám',
-    healthData: {
-      weight: '27.8',
-      height: '125.0',
-      notify_family: 'Học sinh có dị ứng da, tránh tiếp xúc với các chất gy dị ứng.',
-      skin_allergy: true,
-      eczema: true,
-    }
-  },
-  { id: '6', name: 'Hà Trúc An', citizenId: '040322009675', studentCode: '2401079963', birthDate: '22/06/2022', gender: 'Nữ', class: 'Lớp 3B', status: 'Chưa khám' },
-  { id: '7', name: 'Hồ Trung An', citizenId: '040223012300', studentCode: '4088580387', birthDate: '10/09/2023', gender: 'Nam', class: '2 Tuổi A1', status: 'Chưa khám' },
-  { id: '8', name: 'Hồ Hoá An', citizenId: '042323020349', studentCode: '2409440163', birthDate: '11/01/2021', gender: 'Nữ', class: 'Lớp 4A', status: 'Chưa khám' },
-  { id: '9', name: 'Nguyễn Hà An', citizenId: '040320017257', studentCode: '4071283233', birthDate: '18/08/2020', gender: 'Nữ', class: 'Lớp 5A', status: 'Chưa khám' },
-  { id: '10', name: 'Nguyễn Lê Trúc An', citizenId: '040223012380', studentCode: '4088028516', birthDate: '11/07/2023', gender: 'Nữ', class: '2 Tuổi A3', status: 'Chưa khám' },
-  { id: '11', name: 'Nguyễn Minh An', citizenId: '040320024404', studentCode: '2409431123', birthDate: '25/02/2021', gender: 'Nữ', class: 'Lớp 4A', status: 'Chưa khám' },
-];
+import { ImportExcelModal } from './ImportExcelModal';
+import studentService, { Student, MedicalResultDetail } from '../services/studentService';
+import examPeriodService, { ExamPeriod } from '../services/examPeriodService';
+import medicalResultService from '../services/medicalResultService';
 
 export function StudentTable() {
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'inactive'>('all');
@@ -118,21 +18,141 @@ export function StudentTable() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isExamPeriodModalOpen, setIsExamPeriodModalOpen] = useState(false);
   const [isHealthReportModalOpen, setIsHealthReportModalOpen] = useState(false);
-  const [students, setStudents] = useState<Student[]>(mockStudents);
+  const [isImportExcelModalOpen, setIsImportExcelModalOpen] = useState(false);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [examPeriods, setExamPeriods] = useState<ExamPeriod[]>([]);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleHealthDataChange = (studentId: string, field: string, value: boolean) => {
+  // Load danh sách đợt khám khi component mount
+  useEffect(() => {
+    loadExamPeriods();
+  }, []);
+
+  // Load danh sách học sinh khi chọn đợt khám
+  useEffect(() => {
+    if (selectedCampaignId) {
+      loadStudents(selectedCampaignId);
+    }
+  }, [selectedCampaignId]);
+
+  const loadExamPeriods = async () => {
+    try {
+      const periods = await examPeriodService.getExamPeriods();
+      setExamPeriods(periods);
+      // Tự động chọn đợt khám đầu tiên nếu có
+      if (periods.length > 0 && !selectedCampaignId) {
+        setSelectedCampaignId(periods[0].id!);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Có lỗi xảy ra khi tải danh sách đợt khám');
+    }
+  };
+
+  const loadStudents = async (campaignId: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await studentService.getStudentsByCampaign(campaignId);
+      setStudents(data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Có lỗi xảy ra khi tải danh sách học sinh');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAdd = async (studentData: any) => {
+    if (!selectedCampaignId) {
+      setError('Vui lòng chọn đợt khám trước');
+      return;
+    }
+
+    try {
+      const newStudent = await studentService.createStudent({
+        campaignId: selectedCampaignId,
+        fullName: studentData.full_name,
+        gender: studentData.gender === 'Nam' ? 'MALE' : 'FEMALE',
+        dob: studentData.dob,
+        address: studentData.address,
+        identityNumber: studentData.identity_number,
+      });
+      setStudents(prev => [newStudent, ...prev]);
+      setIsAddModalOpen(false);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Có lỗi xảy ra khi thêm học sinh');
+    }
+  };
+
+  const handleDelete = async (id: number, name: string) => {
+    if (confirm(`Bạn có chắc chắn muốn xóa học sinh ${name}?`)) {
+      try {
+        await studentService.deleteStudent(id);
+        setStudents(prev => prev.filter(s => s.id !== id));
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Có lỗi xảy ra khi xóa học sinh');
+      }
+    }
+  };
+
+  const handleHealthDataChange = async (studentId: number, field: string, value: boolean) => {
+    // Cập nhật UI ngay lập tức
     setStudents(prev => prev.map(student => {
       if (student.id === studentId) {
         return {
           ...student,
-          healthData: {
-            ...student.healthData,
-            [field]: value
-          }
+          medicalResults: student.medicalResults?.map(result => {
+            // Logic map field name to medical result
+            // Tùy thuộc vào cấu trúc medicalResults của bạn
+            return result;
+          })
         };
       }
       return student;
     }));
+
+    // TODO: Gọi API cập nhật kết quả khám nếu backend có endpoint riêng
+    // Hiện tại backend chưa có endpoint PUT /medical-results/{id}
+    // Bạn có thể cần thêm endpoint này hoặc update qua student
+  };
+
+  const handleExportExcel = async () => {
+    if (!selectedCampaignId) {
+      setError('Vui lòng chọn đợt khám');
+      return;
+    }
+
+    try {
+      const blob = await medicalResultService.exportExcel(selectedCampaignId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ket-qua-kham-suc-khoe-campaign-${selectedCampaignId}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Có lỗi xảy ra khi xuất Excel');
+    }
+  };
+
+  const handleImportSuccess = () => {
+    if (selectedCampaignId) {
+      loadStudents(selectedCampaignId);
+    }
+  };
+
+  // Helper function để lấy giá trị kết quả khám từ medicalResults
+  const getMedicalResultValue = (student: Student, indicatorName: string): boolean => {
+    if (!student.medicalResults || student.medicalResults.length === 0) {
+      return false;
+    }
+    const result = student.medicalResults.find(
+      r => r.medicalIndicatorName === indicatorName || r.medicalSubIndicatorName === indicatorName
+    );
+    return result?.resultValue || false;
   };
 
   const toggleStudent = (id: string) => {
@@ -143,7 +163,7 @@ export function StudentTable() {
 
   const toggleAll = () => {
     setSelectedStudents(prev =>
-      prev.length === mockStudents.length ? [] : mockStudents.map(s => s.id)
+      prev.length === students.length ? [] : students.map(s => s.id)
     );
   };
 
@@ -158,11 +178,6 @@ export function StudentTable() {
   const handleSave = (updatedStudent: Student) => {
     // Here you would typically update the student in your data source
     console.log('Saving student:', updatedStudent);
-  };
-
-  const handleAdd = (newStudent: any) => {
-    // Here you would typically add the student to your data source
-    console.log('Adding new student:', newStudent);
   };
 
   return (
@@ -185,13 +200,26 @@ export function StudentTable() {
               <FileText className="w-4 h-4" />
               Tải biên bản
             </button>
-            <button className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            <button 
+              onClick={handleExportExcel}
+              disabled={!selectedCampaignId}
+              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:bg-gray-400"
+            >
+              <FileDown className="w-4 h-4" />
+              Export Excel
+            </button>
+            <button 
+              onClick={() => setIsImportExcelModalOpen(true)}
+              disabled={!selectedCampaignId}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+            >
               <FileDown className="w-4 h-4" />
               Import Excel
             </button>
             <button 
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              disabled={!selectedCampaignId}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
             >
               <UserPlus className="w-4 h-4" />
               Thêm học sinh
@@ -199,12 +227,25 @@ export function StudentTable() {
           </div>
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-800">
+            {error}
+          </div>
+        )}
+
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div>
             <label className="block text-sm text-gray-600 mb-1">Đợt khám</label>
-            <select className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
-              <option>Đợt khám học kỳ 1 - 2025</option>
-              <option>Đợt khám học kỳ 2 - 2024</option>
+            <select 
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              value={selectedCampaignId || ''}
+              onChange={(e) => setSelectedCampaignId(Number(e.target.value))}
+            >
+              {examPeriods.map(period => (
+                <option key={period.id} value={period.id}>
+                  {period.campaignName} - {period.schoolYear}
+                </option>
+              ))}
             </select>
           </div>
           <div>
@@ -228,448 +269,450 @@ export function StudentTable() {
           </div>
         </div>
 
-        {/* Wide Table with Horizontal Scroll */}
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
-          <table className="w-full border-collapse text-xs">
-            <thead>
-              <tr className="bg-blue-700 text-white">
-                <th className="border border-gray-300 p-2 sticky left-0 bg-blue-700 z-10" rowSpan={3}>TT</th>
-                <th className="border border-gray-300 p-2 sticky left-12 bg-blue-700 z-10 min-w-[180px]" rowSpan={3}>Họ và tên học sinh</th>
-                
-                {/* Ngày đăng nhận sinh */}
-                <th className="border border-gray-300 p-2" colSpan={2}>Ngày đăng nhận sinh</th>
-                
-                {/* Địa chỉ */}
-                <th className="border border-gray-300 p-2 min-w-[100px]" rowSpan={3}>Địa chỉ</th>
-                
-                {/* Sinh lý danh dinh dưỡng các cước */}
-                <th className="border border-gray-300 p-2" colSpan={2}>Sinh lý danh dinh dưỡng các cước</th>
-                
-                {/* Dinh dưỡng */}
-                <th className="border border-gray-300 p-2" colSpan={4}>Dinh dưỡng</th>
-                
-                {/* Mắt */}
-                <th className="border border-gray-300 p-2" colSpan={7}>Mắt</th>
-                
-                {/* Răng */}
-                <th className="border border-gray-300 p-2" colSpan={4}>Răng</th>
-                
-                {/* Tai mũi họng */}
-                <th className="border border-gray-300 p-2" colSpan={4}>Tai mũi họng</th>
-                
-                {/* Cơ xương khớp */}
-                <th className="border border-gray-300 p-2" colSpan={3}>Cơ xương khớp</th>
-                
-                {/* Da liễu */}
-                <th className="border border-gray-300 p-2" colSpan={3}>Da liễu</th>
-                
-                {/* Tâm thần */}
-                <th className="border border-gray-300 p-2" colSpan={3}>Tâm thần</th>
-                
-                {/* Nội khoa */}
-                <th className="border border-gray-300 p-2" colSpan={5}>Nội khoa</th>
-                
-                {/* TB chung */}
-                <th className="border border-gray-300 p-2" rowSpan={3}>TB chung</th>
-                
-                {/* Ghi chú */}
-                <th className="border border-gray-300 p-2" rowSpan={3}>Ghi chú</th>
-              </tr>
-              
-              {/* Second row */}
-              <tr className="bg-blue-600 text-white">
-                {/* Ngày đăng nhận sinh */}
-                <th className="border border-gray-300 p-1" rowSpan={2}>Nam</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Nữ</th>
-                
-                {/* Sinh lý */}
-                <th className="border border-gray-300 p-1" rowSpan={2}>Cân</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Cao</th>
-                
-                {/* Dinh dưỡng */}
-                <th className="border border-gray-300 p-1" rowSpan={2}>SDD</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Thừa cân</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Béo phì</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>VK</th>
-                
-                {/* Mắt */}
-                <th className="border border-gray-300 p-1" rowSpan={2}>Cận đúng số</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Cận chưa đúng số</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Viễn thị</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Loạn thị</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Lác</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>TD tật khúc xạ</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>VKM</th>
-                
-                {/* Răng */}
-                <th className="border border-gray-300 p-1" rowSpan={2}>Sâu</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Mất</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Hàn</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Viêm lợi</th>
-                
-                {/* Tai mũi họng */}
-                <th className="border border-gray-300 p-1" rowSpan={2}>Viêm mũi</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Viêm họng</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Viêm tai</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Giảm thính lực</th>
-                
-                {/* Cơ xương khớp */}
-                <th className="border border-gray-300 p-1" rowSpan={2}>Cong CS</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Vẹo CS</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Bệnh khác</th>
-                
-                {/* Da liễu */}
-                <th className="border border-gray-300 p-1" rowSpan={2}>Viêm da</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Vẩy nến</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Bệnh khác</th>
-                
-                {/* Tâm thần */}
-                <th className="border border-gray-300 p-1" rowSpan={2}>Lo âu</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Trầm cảm</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>RLT</th>
-                
-                {/* Nội khoa */}
-                <th className="border border-gray-300 p-1" rowSpan={2}>Hẹp PQ</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Thấp tim</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Bướu cổ</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>DT BS</th>
-                <th className="border border-gray-300 p-1" rowSpan={2}>Bệnh khác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student, index) => (
-                <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="border border-gray-300 p-2 text-center sticky left-0 bg-inherit z-[5]">{index + 1}</td>
-                  <td className="border border-gray-300 p-2 sticky left-12 bg-inherit z-[5]">{student.name}</td>
+        {loading ? (
+          <div className="text-center py-8 text-gray-500">Đang tải dữ liệu...</div>
+        ) : (
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="w-full border-collapse text-xs">
+              <thead>
+                <tr className="text-white" style={{ backgroundColor: '#2191b0' }}>
+                  <th className="border border-gray-300 p-2 sticky left-0 z-10" style={{ backgroundColor: '#2191b0' }} rowSpan={3}>TT</th>
+                  <th className="border border-gray-300 p-2 sticky left-12 z-10 min-w-[180px]" style={{ backgroundColor: '#2191b0' }} rowSpan={3}>Họ và tên học sinh</th>
                   
-                  {/* Ngày sinh */}
-                  <td className="border border-gray-300 p-2 text-center">{student.gender === 'Nam' ? student.birthDate : ''}</td>
-                  <td className="border border-gray-300 p-2 text-center">{student.gender === 'Nữ' ? student.birthDate : ''}</td>
+                  {/* Ngày đăng nhận sinh */}
+                  <th className="border border-gray-300 p-2" colSpan={2}>Ngày đăng nhận sinh</th>
                   
                   {/* Địa chỉ */}
-                  <td className="border border-gray-300 p-2 text-xs">Khối 6 Phường Đồi Cung</td>
+                  <th className="border border-gray-300 p-2 min-w-[100px]" rowSpan={3}>Địa chỉ</th>
                   
-                  {/* Cân Cao */}
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="text" 
-                      value={student.healthData?.weight || ''}
-                      onChange={(e) => {
-                        setStudents(prev => prev.map(s => 
-                          s.id === student.id 
-                            ? { ...s, healthData: { ...s.healthData, weight: e.target.value } }
-                            : s
-                        ));
-                      }}
-                      className="w-12 text-center border-0 bg-transparent"
-                      placeholder="0"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="text" 
-                      value={student.healthData?.height || ''}
-                      onChange={(e) => {
-                        setStudents(prev => prev.map(s => 
-                          s.id === student.id 
-                            ? { ...s, healthData: { ...s.healthData, height: e.target.value } }
-                            : s
-                        ));
-                      }}
-                      className="w-12 text-center border-0 bg-transparent"
-                      placeholder="0"
-                    />
-                  </td>
+                  {/* Sinh lý danh dinh dưỡng các cước */}
+                  <th className="border border-gray-300 p-2" colSpan={2}>Sinh lý danh dinh dưỡng các cước</th>
                   
                   {/* Dinh dưỡng */}
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.sdd || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'sdd', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.overweight || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'overweight', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.obesity || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'obesity', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input type="checkbox" className="w-4 h-4" />
-                  </td>
+                  <th className="border border-gray-300 p-2" colSpan={4}>Dinh dưỡng</th>
                   
                   {/* Mắt */}
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.myopia_correct || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'myopia_correct', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.myopia_incorrect || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'myopia_incorrect', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.hyperopia || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'hyperopia', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.astigmatism || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'astigmatism', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.strabismus || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'strabismus', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.refractive_error || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'refractive_error', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.vkm || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'vkm', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
+                  <th className="border border-gray-300 p-2" colSpan={7}>Mắt</th>
                   
                   {/* Răng */}
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.cavities || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'cavities', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input type="checkbox" className="w-4 h-4" />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input type="checkbox" className="w-4 h-4" />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.gingivitis || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'gingivitis', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
+                  <th className="border border-gray-300 p-2" colSpan={4}>Răng</th>
                   
                   {/* Tai mũi họng */}
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.nose_inflammation || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'nose_inflammation', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.throat_inflammation || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'throat_inflammation', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.ear_infection || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'ear_infection', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.hearing_loss || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'hearing_loss', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
+                  <th className="border border-gray-300 p-2" colSpan={4}>Tai mũi họng</th>
                   
                   {/* Cơ xương khớp */}
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.scoliosis || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'scoliosis', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input type="checkbox" className="w-4 h-4" />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.flat_feet || student.healthData?.limb_deformity || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'flat_feet', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
+                  <th className="border border-gray-300 p-2" colSpan={3}>Cơ xương khớp</th>
                   
                   {/* Da liễu */}
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.eczema || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'eczema', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input type="checkbox" className="w-4 h-4" />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.skin_allergy || student.healthData?.fungal_infection || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'skin_allergy', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
+                  <th className="border border-gray-300 p-2" colSpan={3}>Da liễu</th>
                   
                   {/* Tâm thần */}
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.anxiety || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'anxiety', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.depression || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'depression', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.behavioral_disorder || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'behavioral_disorder', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
+                  <th className="border border-gray-300 p-2" colSpan={3}>Tâm thần</th>
                   
                   {/* Nội khoa */}
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.respiratory_disease || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'respiratory_disease', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.heart_disease || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'heart_disease', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input type="checkbox" className="w-4 h-4" />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input type="checkbox" className="w-4 h-4" />
-                  </td>
-                  <td className="border border-gray-300 p-2 text-center">
-                    <input 
-                      type="checkbox" 
-                      checked={student.healthData?.digestive_disease || false}
-                      onChange={(e) => handleHealthDataChange(student.id, 'digestive_disease', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                  </td>
+                  <th className="border border-gray-300 p-2" colSpan={5}>Nội khoa</th>
                   
                   {/* TB chung */}
-                  <td className="border border-gray-300 p-2 text-center">
-                    <select className="text-xs border-0 bg-transparent">
-                      <option>Khỏe</option>
-                      <option>TB</option>
-                      <option>Yếu</option>
-                    </select>
-                  </td>
+                  <th className="border border-gray-300 p-2" rowSpan={3}>TB chung</th>
                   
                   {/* Ghi chú */}
-                  <td className="border border-gray-300 p-2">
-                    <input 
-                      type="text" 
-                      value={student.healthData?.notify_family || ''}
-                      onChange={(e) => {
-                        setStudents(prev => prev.map(s => 
-                          s.id === student.id 
-                            ? { ...s, healthData: { ...s.healthData, notify_family: e.target.value } }
-                            : s
-                        ));
-                      }}
-                      className="w-full text-xs border-0 bg-transparent"
-                      placeholder="Nhập ghi chú..."
-                    />
-                  </td>
+                  <th className="border border-gray-300 p-2" rowSpan={3}>Ghi chú</th>
                   
                   {/* Xóa */}
-                  <td className="border border-gray-300 p-2 text-center">
-                    <button 
-                      onClick={() => {
-                        if (confirm(`Bạn có chắc chắn muốn xóa học sinh ${student.name}?`)) {
-                          setStudents(prev => prev.filter(s => s.id !== student.id));
-                        }
-                      }}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
+                  <th className="border border-gray-300 p-2" rowSpan={3}>Xóa</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                
+                {/* Second row */}
+                <tr className="text-white" style={{ backgroundColor: '#2191b0' }}>
+                  {/* Ngày đăng nhận sinh */}
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Nam</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Nữ</th>
+                  
+                  {/* Sinh lý */}
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Cân</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Cao</th>
+                  
+                  {/* Dinh dưỡng */}
+                  <th className="border border-gray-300 p-1" rowSpan={2}>SDD</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Thừa cân</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Béo phì</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>VK</th>
+                  
+                  {/* Mắt */}
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Cận đúng số</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Cận chưa đúng số</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Viễn thị</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Loạn thị</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Lác</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>TD tật khúc xạ</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>VKM</th>
+                  
+                  {/* Răng */}
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Sâu</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Mất</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Hàn</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Viêm lợi</th>
+                  
+                  {/* Tai mũi họng */}
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Viêm mũi</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Viêm họng</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Viêm tai</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Giảm thính lực</th>
+                  
+                  {/* Cơ xương khớp */}
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Cong CS</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Vẹo CS</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Bệnh khác</th>
+                  
+                  {/* Da liễu */}
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Viêm da</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Vẩy nến</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Bệnh khác</th>
+                  
+                  {/* Tâm thần */}
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Lo âu</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Trầm cảm</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>RLT</th>
+                  
+                  {/* Nội khoa */}
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Hẹp PQ</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Thấp tim</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Bướu cổ</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>DT BS</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Bệnh khác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((student, index) => (
+                  <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="border border-gray-300 p-2 text-center sticky left-0 bg-inherit z-[5]">{index + 1}</td>
+                    <td className="border border-gray-300 p-2 sticky left-12 bg-inherit z-[5]">{student.fullName}</td>
+                    
+                    {/* Ngày sinh */}
+                    <td className="border border-gray-300 p-2 text-center">{student.gender === 'MALE' ? student.dob : ''}</td>
+                    <td className="border border-gray-300 p-2 text-center">{student.gender === 'FEMALE' ? student.dob : ''}</td>
+                    
+                    {/* Địa chỉ */}
+                    <td className="border border-gray-300 p-2 text-xs">{student.address || 'Khối 6 Phường Đồi Cung'}</td>
+                    
+                    {/* Cân Cao */}
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="text" 
+                        value={student.weight || ''}
+                        onChange={(e) => {
+                          setStudents(prev => prev.map(s => 
+                            s.id === student.id 
+                              ? { ...s, weight: e.target.value }
+                              : s
+                          ));
+                        }}
+                        className="w-12 text-center border-0 bg-transparent"
+                        placeholder="0"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="text" 
+                        value={student.height || ''}
+                        onChange={(e) => {
+                          setStudents(prev => prev.map(s => 
+                            s.id === student.id 
+                              ? { ...s, height: e.target.value }
+                              : s
+                          ));
+                        }}
+                        className="w-12 text-center border-0 bg-transparent"
+                        placeholder="0"
+                      />
+                    </td>
+                    
+                    {/* Dinh dưỡng */}
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'SDD')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'sdd', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Thừa cân')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'overweight', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Béo phì')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'obesity', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input type="checkbox" className="w-4 h-4" />
+                    </td>
+                    
+                    {/* Mắt */}
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Cận đúng số')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'myopia_correct', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Cận chưa đúng số')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'myopia_incorrect', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Viễn thị')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'hyperopia', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Loạn thị')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'astigmatism', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Lác')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'strabismus', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'TD tật khúc xạ')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'refractive_error', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'VKM')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'vkm', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    
+                    {/* Răng */}
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Sâu răng')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'cavities', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input type="checkbox" className="w-4 h-4" />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input type="checkbox" className="w-4 h-4" />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Viêm lợi')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'gingivitis', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    
+                    {/* Tai mũi họng */}
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Viêm mũi')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'nose_inflammation', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Viêm họng')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'throat_inflammation', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Viêm tai')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'ear_infection', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Giảm thính lực')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'hearing_loss', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    
+                    {/* Cơ xương khớp */}
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Cong cột sống')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'scoliosis', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input type="checkbox" className="w-4 h-4" />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Bệnh khác CXK')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'flat_feet', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    
+                    {/* Da liễu */}
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Viêm da')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'eczema', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input type="checkbox" className="w-4 h-4" />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Bệnh khác Da liễu')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'skin_allergy', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    
+                    {/* Tâm thần */}
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Lo âu')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'anxiety', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Trầm cảm')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'depression', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'RLT hành vi')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'behavioral_disorder', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    
+                    {/* Nội khoa */}
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Hô hấp')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'respiratory_disease', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Tim mạch')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'heart_disease', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input type="checkbox" className="w-4 h-4" />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input type="checkbox" className="w-4 h-4" />
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      <input 
+                        type="checkbox" 
+                        checked={getMedicalResultValue(student, 'Tiêu hóa')}
+                        onChange={(e) => handleHealthDataChange(student.id!, 'digestive_disease', e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                    </td>
+                    
+                    {/* TB chung */}
+                    <td className="border border-gray-300 p-2 text-center">
+                      <select className="text-xs border-0 bg-transparent">
+                        <option>Khỏe</option>
+                        <option>TB</option>
+                        <option>Yếu</option>
+                      </select>
+                    </td>
+                    
+                    {/* Ghi chú */}
+                    <td className="border border-gray-300 p-2">
+                      <input 
+                        type="text" 
+                        value={student.notifyFamily || ''}
+                        onChange={(e) => {
+                          setStudents(prev => prev.map(s => 
+                            s.id === student.id 
+                              ? { ...s, notifyFamily: e.target.value }
+                              : s
+                          ));
+                        }}
+                        className="w-full text-xs border-0 bg-transparent"
+                        placeholder="Nhập ghi chú..."
+                      />
+                    </td>
+                    
+                    {/* Xóa */}
+                    <td className="border border-gray-300 p-2 text-center">
+                      <button 
+                        onClick={() => handleDelete(student.id!, student.fullName)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
           <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -721,6 +764,13 @@ export function StudentTable() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAdd}
+      />
+
+      <ImportExcelModal
+        isOpen={isImportExcelModalOpen}
+        onClose={() => setIsImportExcelModalOpen(false)}
+        campaignId={selectedCampaignId || 0}
+        onImportSuccess={handleImportSuccess}
       />
     </div>
   );
