@@ -112,7 +112,7 @@ spring:
 
 &nbsp; datasource:
 
-&nbsp;   url: jdbc:postgresql://localhost:5432/y\_te\_hoc\_duong
+&nbsp;   url: jdbc:postgresql://localhost:5432/yte
 
 &nbsp;   username: postgres
 
@@ -146,9 +146,6 @@ spring:
 
 ```
 
-
-
-> ⚠️ Lưu ý: `FAIL\_ON\_EMPTY\_BEANS` chỉ nên dùng khi cần, DTO vẫn là cách chuẩn.
 
 
 
@@ -202,7 +199,7 @@ Mặc định server chạy tại:
 
 ```
 
-http://localhost:8080
+http://localhost:8088
 
 ```
 
