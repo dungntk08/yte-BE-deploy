@@ -488,10 +488,10 @@ public class ExcelServiceImpl implements ExcelService {
                 row.createCell(col++).setCellValue(student.getAddress());
                 row.createCell(col++).setCellValue(student.getIdentityNumber());
                 row.createCell(col++).setCellValue(
-                        student.getWeight() != null ? student.getWeight().doubleValue() : null
+                        student.getWeight() != null ? student.getWeight().doubleValue() : 0.0
                 );
                 row.createCell(col++).setCellValue(
-                        student.getHeight() != null ? student.getHeight().doubleValue() : null
+                        student.getHeight() != null ? student.getHeight().doubleValue() : 0.0
                 );
                 row.createCell(col++).setCellValue(student.getNotifyFamily());
 

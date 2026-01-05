@@ -1,5 +1,6 @@
 package sk.ytr.modules.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import sk.ytr.modules.constant.GenderTypeEnum;
 import sk.ytr.modules.entity.Student;
@@ -28,6 +29,7 @@ public class StudentResponseDTO {
     private GenderTypeEnum gender;
 
     /** Ngày sinh */
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private Date dob;
 
     /** Địa chỉ học sinh */

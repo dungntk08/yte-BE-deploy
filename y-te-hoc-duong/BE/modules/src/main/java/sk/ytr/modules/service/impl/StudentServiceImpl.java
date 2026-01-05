@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sk.ytr.modules.dto.request.StudentRequestDTO;
 import sk.ytr.modules.dto.response.MedicalResultDetailResponseDTO;
 import sk.ytr.modules.dto.response.StudentResponseDTO;
@@ -47,6 +48,7 @@ public class StudentServiceImpl implements StudentService {
      * @return DTO phản hồi chứa thông tin học sinh vừa được tạo.
      */
     @Override
+    @Transactional
     public StudentResponseDTO createStudent(StudentRequestDTO request) {
         try {
             studentServiceValidate.validateCreateRequest(request);
@@ -66,7 +68,7 @@ public class StudentServiceImpl implements StudentService {
             );
         } catch (Exception e) {
             log.error("Lỗi tạo học sinh", e);
-            throw new RuntimeException("Tạo học sinh thất bại");
+            throw new RuntimeException("Tạo học sinh thất bại: " + e.getMessage());
         }
     }
 
@@ -92,7 +94,7 @@ public class StudentServiceImpl implements StudentService {
 
         } catch (Exception e) {
             log.error("Lỗi tạo kết quả khám cho học sinh", e);
-            throw new RuntimeException("Tạo kết quả khám cho học sinh thất bại");
+            throw new RuntimeException("Tạo kết quả khám cho học sinh thất bại: " + e.getMessage());
         }
     }
 
