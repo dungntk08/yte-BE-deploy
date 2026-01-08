@@ -99,8 +99,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/stock-vouchers', [\App\Http\Controllers\StockVoucherController::class, 'index']);
 
     Route::get('/inventory/stock', [\App\Http\Controllers\InventoryController::class, 'getRealtimeInventory']);
+    Route::get('/inventory/stock/{id}/history', [\App\Http\Controllers\InventoryController::class, 'getProductHistory']);
     Route::get('/inventory/status', [\App\Http\Controllers\InventoryController::class, 'status']);
     
     // Legacy SQL Server Sync
     Route::get('/legacy/invoices', [\App\Http\Controllers\LegacySyncController::class, 'getInvoices']);
+
+    // Reports
+    Route::get('/reports/inventory-check', [\App\Http\Controllers\ReportController::class, 'getInventoryCheck']);
+    Route::get('/reports/inventory-check/pdf', [\App\Http\Controllers\ReportController::class, 'exportInventoryCheckPdf']);
 });

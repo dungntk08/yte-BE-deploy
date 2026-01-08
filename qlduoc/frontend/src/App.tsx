@@ -14,6 +14,7 @@ import SupplierListPage from './modules/suppliers/pages/SupplierListPage';
 import StockAlertsPage from './modules/inventory/pages/StockAlertsPage';
 import InventoryStockPage from './modules/inventory/pages/InventoryStockPage';
 import UserListPage from './modules/users/pages/UserListPage';
+import InventoryCheckReportPage from './modules/reports/pages/InventoryCheckReportPage';
 import DashboardPage from './modules/dashboard/pages/DashboardPage';
 import MedicalCenterManagementPage from './modules/admin/pages/MedicalCenterManagementPage';
 import AdminLoginPage from './modules/admin/pages/AdminLoginPage';
@@ -92,6 +93,7 @@ function App() {
         <Route path="/suppliers" element={<ProtectedRoute><SupplierListPage /></ProtectedRoute>} />
         {/* <Route path="/units" element={<ProtectedRoute><UnitManagementPage /></ProtectedRoute>} /> */}
         <Route path="/users" element={<ProtectedRoute><UserListPage /></ProtectedRoute>} />
+        <Route path="/reports/inventory-check" element={<ProtectedRoute><InventoryCheckReportPage /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )

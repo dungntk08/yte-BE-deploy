@@ -555,7 +555,7 @@ const PrescriptionCreateForm = ({
                             expiry_date: batch.expiry_date,
                             quantity: takeQty,
                             quantity_in_stock: batchQty,
-                            price: batch.import_price || 0
+                            price: (batch.import_price || 0) * 1.1 // Markup 10%
                         });
                         remainingQty -= takeQty;
                     }
@@ -612,7 +612,7 @@ const PrescriptionCreateForm = ({
             expiry_date: batch.expiry_date,
             quantity: 1,
             quantity_in_stock: batch.quantity,
-            price: batch.import_price || 0
+            price: (batch.import_price || 0) * 1.1 // Markup 10%
         }]);
         setShowSearchModal(false);
         setSelectedProduct(null);

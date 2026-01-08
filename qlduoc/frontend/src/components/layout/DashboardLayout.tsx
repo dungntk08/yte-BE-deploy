@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, LogOut, Home, ClipboardList, Settings, Package } from 'lucide-react';
+import { Menu, X, LogOut, Home, ClipboardList, Settings, Package, FileText, Users } from 'lucide-react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -29,6 +29,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
       ]
     },
     { icon: <Package size={20} />, label: 'Tồn kho', path: '/inventory/stock' },
+    {
+      icon: <FileText size={20} />, label: 'Báo cáo', path: '/reports', subItems: [
+        { label: 'Kiểm kê kho', path: '/reports/inventory-check' },
+      ]
+    },
     {
       icon: <Settings size={20} />, label: 'Cài đặt', path: '/settings', subItems: [
         { label: 'Hàng hóa', path: '/products' },

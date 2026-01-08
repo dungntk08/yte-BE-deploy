@@ -4,9 +4,12 @@ import api from '../../../api/axios';
 import { Search, Package } from 'lucide-react';
 import { getWarehouses } from '../../warehouses/services/warehouseService';
 
+import InventoryDetailModal from '../components/InventoryDetailModal';
+
 const InventoryStockPage: React.FC = () => {
     const [stock, setStock] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
     const [filters, setFilters] = useState({
         warehouse_id: '',
         product_name: ''
@@ -46,7 +49,7 @@ const InventoryStockPage: React.FC = () => {
             const response = await api.get('/inventory/stock', {
                 params: {
                     warehouse_id: filters.warehouse_id,
-                    product_name: filters.product_name,
+                    search: filters.product_name,
                     page: pagination.current_page,
                     limit: 30
                 }
@@ -125,8 +128,12 @@ const InventoryStockPage: React.FC = () => {
                                 <tr><td colSpan={4} className="p-8 text-center text-gray-500">Đang tải dữ liệu...</td></tr>
                             ) : stock.length > 0 ? (
                                 stock.map((item: any, idx: number) => (
-                                    <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                                        <td className="p-4 font-mono text-blue-600">{item.Code}</td>
+                                    <tr
+                                        key={idx}
+                                        className="hover:bg-gray-50 transition-colors cursor-pointer group"
+                                        onClick={() => setSelectedProduct(item.Id)}
+                                    >
+                                        <td className="p-4 font-mono text-blue-600 group-hover:text-blue-800 transition-colors">{item.Code}</td>
                                         <td className="p-4 font-medium text-gray-900">{item.Name}</td>
                                         <td className="p-4 text-center">{item.Unit}</td>
                                         <td className={`p-4 text-right font-bold ${item.Stock > 0 ? 'text-gray-900' : 'text-red-500'}`}>
@@ -162,6 +169,15 @@ const InventoryStockPage: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Detail Modal */}
+            {selectedProduct && (
+                <InventoryDetailModal
+                    productId={selectedProduct}
+                    warehouseId={filters.warehouse_id}
+                    onClose={() => setSelectedProduct(null)}
+                />
+            )}
         </DashboardLayout>
     );
 };

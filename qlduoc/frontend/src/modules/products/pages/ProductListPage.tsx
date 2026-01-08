@@ -159,6 +159,7 @@ const ProductListPage: React.FC = () => {
               { key: 'Index', label: 'STT', width: '50px', align: 'center' },
               { key: 'Code', label: 'Mã dược', width: '10%' },
               { key: 'Name', label: 'Tên Thuốc, VTYT, Vắc xin, Dung môi' },
+              { key: 'ActiveIngredient', label: 'Hoạt chất' },
               { key: 'Unit', label: 'ĐVT', width: '80px' },
               { key: 'RegistrationNumber', label: 'Số đăng ký', width: '120px' },
               { key: 'PharmacyType', label: 'Loại vật tư', width: '120px' }, // Displaying PharmacyType here based on request context? Or ProductType? Let's use PharmacyType from medicine data
@@ -187,6 +188,7 @@ const ProductListPage: React.FC = () => {
                     <td className="px-4 py-4 text-gray-900">
                       <div className='font-medium'>{product.Name}</div>
                     </td>
+                    <td className="px-4 py-4 text-gray-600 max-w-xs truncate">{product.medicine?.ActiveIngredientName}</td>
                     <td className="px-4 py-4 text-gray-600">{product.UnitName}</td>
                     <td className="px-4 py-4 text-gray-600">{product.medicine?.RegistrationNumber}</td>
                     <td className="px-4 py-4 text-gray-600">{product.medicine?.PharmacyType}</td>

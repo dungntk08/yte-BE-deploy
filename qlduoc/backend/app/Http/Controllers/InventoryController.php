@@ -897,7 +897,7 @@ class InventoryController extends Controller
         $warehouseId = $request->get('warehouse_id');
         $search = $request->get('search');
 
-        $query = Product::where('IsActive', true)->with('unit');
+        $query = Product::where('IsActive', true)->with(['unit', 'medicine']);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -1043,6 +1043,7 @@ class InventoryController extends Controller
                 'Code' => $product->Code,
                 'Name' => $product->Name,
                 'Unit' => $product->unit->Name ?? '---',
+                'ActiveIngredient' => $product->medicine->ActiveIngredientName ?? '',
                 'Stock' => $totalStock
             ];
         });
@@ -1050,6 +1051,141 @@ class InventoryController extends Controller
         $products->setCollection($result);
 
         return response()->json($products);
+    }
+
+    public function getProductHistory(Request $request, $id)
+    {
+        $warehouseId = $request->get('warehouse_id');
+        $product = Product::with('unit')->findOrFail($id);
+
+        // 1. Calculate Realtime Stock per Batch
+        // Get Snapshots
+        $snapshotQuery = InventorySnapshot::where('ProductId', $id);
+        if ($warehouseId) {
+            $snapshotQuery->where('WarehouseId', $warehouseId);
+        }
+        $snapshots = $snapshotQuery->get();
+
+        // Get Approved Voucher Details (In/Out)
+        // We need details to calculate realtime stock AND to show history.
+        $detailsQuery = StockVoucherDetail::join('StockVouchers', 'StockVouchers.Id', '=', 'StockVoucherDetails.VoucherId')
+            ->where('StockVoucherDetails.ProductId', $id)
+            ->whereIn('StockVouchers.Status', ['Approved', 'Completed']);
+            
+        if ($warehouseId) {
+            $detailsQuery->where(function($q) use ($warehouseId) {
+                $q->where('StockVouchers.TargetWarehouseId', $warehouseId)
+                  ->orWhere('StockVouchers.SourceWarehouseId', $warehouseId);
+            });
+        }
+
+        $allDetails = $detailsQuery->select(
+            'StockVoucherDetails.*',
+            'StockVouchers.VoucherType',
+            'StockVouchers.VoucherDate',
+            'StockVouchers.Code as VoucherCode',
+            'StockVouchers.TargetWarehouseId',
+            'StockVouchers.SourceWarehouseId',
+            'StockVouchers.PartnerId',
+            'StockVouchers.Description'
+        )
+        ->orderBy('StockVouchers.VoucherDate', 'desc')
+        ->orderBy('StockVouchers.CreatedAt', 'desc')
+        ->get();
+
+        // A. Calculate Batches
+        // Identify all batches involved
+        $batchNumbers = $snapshots->pluck('BatchNumber')
+            ->merge($allDetails->pluck('BatchNumber'))
+            ->unique()
+            ->filter()
+            ->values();
+
+        $batches = [];
+        
+        foreach ($batchNumbers as $batchNumber) {
+            // Filter relevant data for this batch
+            $batchSnapshots = $snapshots->where('BatchNumber', $batchNumber);
+            $batchDetails = $allDetails->where('BatchNumber', $batchNumber);
+            
+            // We need to sum up across warehouses (or single if filtered)
+            // Strategy: 
+            // 1. Identify all warehouses involved for this batch
+            $wIds = $batchSnapshots->pluck('WarehouseId')
+                ->merge($batchDetails->pluck('TargetWarehouseId'))
+                ->merge($batchDetails->pluck('SourceWarehouseId'))
+                ->unique()
+                ->filter();
+            
+            if ($warehouseId) $wIds = collect([$warehouseId]);
+
+            $totalBatchStock = 0;
+            $expiryDate = null; // Take from snapshot or detail
+
+            foreach ($wIds as $wId) {
+                // Latest Snapshot for this Warehouse & Batch
+                $snap = $batchSnapshots->where('WarehouseId', $wId)->sortByDesc('SnapshotDate')->first();
+                $baseQty = $snap ? $snap->Quantity : 0;
+                $snapDate = $snap ? $snap->SnapshotDate : '1900-01-01';
+                
+                if ($snap && $snap->ExpiryDate) $expiryDate = $snap->ExpiryDate;
+
+                // Calculate Delta
+                $delta = $batchDetails->reduce(function ($carry, $d) use ($wId, $snapDate) {
+                    if ($d->VoucherDate <= $snapDate) return $carry; // Already in snapshot
+
+                    $isTarget = $d->TargetWarehouseId == $wId;
+                    $isSource = $d->SourceWarehouseId == $wId;
+
+                    if ($d->VoucherType === 'Import' && $isTarget) return $carry + $d->Quantity;
+                    if ($d->VoucherType === 'Export' && $isSource) return $carry - $d->Quantity;
+                    // Prescription/Retail are types of Export usually? 
+                    // If VoucherType is Prescription/Retail, it maps to Export logic generally (Source=W).
+                    if (in_array($d->VoucherType, ['Prescription', 'Retail']) && $isSource) return $carry - $d->Quantity;
+
+                    return $carry;
+                }, 0);
+
+                $totalBatchStock += ($baseQty + $delta);
+            }
+            
+            // Try to find expiry if not in snapshot
+            if (!$expiryDate) {
+                $eDetail = $batchDetails->whereNotNull('ExpiryDate')->first();
+                $expiryDate = $eDetail ? $eDetail->ExpiryDate : null;
+            }
+
+            if ($totalBatchStock != 0) {
+                 $batches[] = [
+                    'BatchNumber' => $batchNumber,
+                    'ExpiryDate' => $expiryDate,
+                    'Quantity' => $totalBatchStock
+                ];
+            }
+        }
+
+        // B. History
+        // Format $allDetails for display
+        $history = $allDetails->map(function($d) {
+            return [
+                'Id' => $d->Id, // Voucher Detail Id? Or Voucher Id? Let's use VoucherId for link
+                'VoucherId' => $d->VoucherId,
+                'VoucherCode' => $d->VoucherCode,
+                'VoucherDate' => $d->VoucherDate,
+                'Type' => $d->VoucherType,
+                'Description' => $d->Description,
+                'Quantity' => $d->Quantity,
+                'BatchNumber' => $d->BatchNumber,
+                'PartnerName' => '', // TODO: fetch partner name or warehouse name?
+                // For now, simpler is better.
+            ];
+        });
+
+        return response()->json([
+            'product' => $product,
+            'batches' => $batches,
+            'history' => $history
+        ]);
     }
     
     /*
