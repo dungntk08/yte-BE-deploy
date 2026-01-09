@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Header } from './Header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -62,7 +61,6 @@ const COLORS = ['#3b82f6', '#e5e7eb'];
 const DISEASE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
 export function StatisticsPage() {
-  const navigate = useNavigate();
   const { campaigns, loading: campaignsLoading } = useCampaigns();
   const { students, loading: studentsLoading } = useStudents();
   
