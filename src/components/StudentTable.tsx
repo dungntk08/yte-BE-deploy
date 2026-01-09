@@ -22,7 +22,167 @@ import examPeriodService, {
 } from "../services/examPeriodService";
 import medicalResultService from "../services/medicalResultService";
 
-export function StudentTable() {
+interface StudentTableProps {
+  initialCampaignId?: number | null;
+}
+
+// Mock students data
+const MOCK_STUDENTS: Student[] = [
+  {
+    id: 1,
+    campaignId: 1,
+    fullName: 'Nguyễn Văn An',
+    gender: 'MALE',
+    dob: '2020-03-15',
+    address: 'Khối 6 Phường Đồi Cung',
+    identityNumber: '001234567890',
+    weight: '15.5',
+    height: '105',
+    notifyFamily: '',
+    medicalResults: [
+      { medicalIndicatorName: 'Cận đúng số', resultValue: true },
+      { medicalIndicatorName: 'Sâu răng', resultValue: true },
+    ]
+  },
+  {
+    id: 2,
+    campaignId: 1,
+    fullName: 'Trần Thị Bình',
+    gender: 'FEMALE',
+    dob: '2020-05-20',
+    address: 'Khối 6 Phường Đồi Cung',
+    identityNumber: '001234567891',
+    weight: '14.8',
+    height: '103',
+    notifyFamily: '',
+    medicalResults: [
+      { medicalIndicatorName: 'Thừa cân', resultValue: true },
+    ]
+  },
+  {
+    id: 3,
+    campaignId: 1,
+    fullName: 'Lê Minh Châu',
+    gender: 'MALE',
+    dob: '2020-07-10',
+    address: 'Khối 6 Phường Đồi Cung',
+    identityNumber: '001234567892',
+    weight: '16.2',
+    height: '108',
+    notifyFamily: '',
+    medicalResults: [
+      { medicalIndicatorName: 'Viêm họng', resultValue: true },
+      { medicalIndicatorName: 'Viêm tai', resultValue: true },
+    ]
+  },
+  {
+    id: 4,
+    campaignId: 1,
+    fullName: 'Phạm Thị Dung',
+    gender: 'FEMALE',
+    dob: '2020-02-28',
+    address: 'Khối 6 Phường Đồi Cung',
+    identityNumber: '001234567893',
+    weight: '15.0',
+    height: '104',
+    notifyFamily: '',
+    medicalResults: [
+      { medicalIndicatorName: 'SDD', resultValue: true },
+    ]
+  },
+  {
+    id: 5,
+    campaignId: 1,
+    fullName: 'Hoàng Văn Em',
+    gender: 'MALE',
+    dob: '2020-09-12',
+    address: 'Khối 6 Phường Đồi Cung',
+    identityNumber: '001234567894',
+    weight: '17.5',
+    height: '110',
+    notifyFamily: '',
+    medicalResults: [
+      { medicalIndicatorName: 'Béo phì', resultValue: true },
+      { medicalIndicatorName: 'Cận chưa đúng số', resultValue: true },
+    ]
+  },
+  {
+    id: 6,
+    campaignId: 1,
+    fullName: 'Đỗ Thị Phượng',
+    gender: 'FEMALE',
+    dob: '2020-04-18',
+    address: 'Khối 6 Phường Đồi Cung',
+    identityNumber: '001234567895',
+    weight: '14.5',
+    height: '102',
+    notifyFamily: '',
+    medicalResults: [
+      { medicalIndicatorName: 'Loạn thị', resultValue: true },
+      { medicalIndicatorName: 'Viêm lợi', resultValue: true },
+    ]
+  },
+  {
+    id: 7,
+    campaignId: 1,
+    fullName: 'Vũ Minh Giang',
+    gender: 'MALE',
+    dob: '2020-06-25',
+    address: 'Khối 6 Phường Đồi Cung',
+    identityNumber: '001234567896',
+    weight: '15.8',
+    height: '106',
+    notifyFamily: '',
+    medicalResults: [
+      { medicalIndicatorName: 'Viêm da', resultValue: true },
+    ]
+  },
+  {
+    id: 8,
+    campaignId: 1,
+    fullName: 'Bùi Thị Hoa',
+    gender: 'FEMALE',
+    dob: '2020-08-30',
+    address: 'Khối 6 Phường Đồi Cung',
+    identityNumber: '001234567897',
+    weight: '14.2',
+    height: '101',
+    notifyFamily: '',
+    medicalResults: []
+  },
+  {
+    id: 9,
+    campaignId: 1,
+    fullName: 'Đinh Văn Ích',
+    gender: 'MALE',
+    dob: '2020-01-15',
+    address: 'Khối 6 Phường Đồi Cung',
+    identityNumber: '001234567898',
+    weight: '16.0',
+    height: '107',
+    notifyFamily: '',
+    medicalResults: [
+      { medicalIndicatorName: 'Hô hấp', resultValue: true },
+    ]
+  },
+  {
+    id: 10,
+    campaignId: 1,
+    fullName: 'Trương Thị Kim',
+    gender: 'FEMALE',
+    dob: '2020-11-05',
+    address: 'Khối 6 Phường Đồi Cung',
+    identityNumber: '001234567899',
+    weight: '15.3',
+    height: '105',
+    notifyFamily: '',
+    medicalResults: [
+      { medicalIndicatorName: 'Lo âu', resultValue: true },
+    ]
+  },
+];
+
+export function StudentTable({ initialCampaignId }: StudentTableProps) {
   const [activeTab, setActiveTab] = useState<
     "all" | "active" | "inactive"
   >("all");
@@ -51,6 +211,28 @@ export function StudentTable() {
   const [error, setError] = useState<string | null>(null);
   const [backendConnected, setBackendConnected] =
     useState<boolean>(true);
+  const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(null);
+  const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
+
+  // Mock data for schools and classes
+  const mockSchools = [
+    { id: 1, name: 'Trường Mầm Non Đồi Cung' },
+    { id: 2, name: 'Trường Mầm Non Hoa Sen' },
+    { id: 3, name: 'Trường Mầm Non Ánh Dương' },
+  ];
+
+  const mockClasses = [
+    { id: 1, name: 'Lớp Mẫu Giáo 1', schoolId: 1 },
+    { id: 2, name: 'Lớp Mẫu Giáo 2', schoolId: 1 },
+    { id: 3, name: 'Lớp Nhà Trẻ 1', schoolId: 1 },
+    { id: 4, name: 'Lớp Mẫu Giáo A', schoolId: 2 },
+    { id: 5, name: 'Lớp Mẫu Giáo B', schoolId: 2 },
+  ];
+
+  // Filter classes by selected school
+  const filteredClasses = selectedSchoolId 
+    ? mockClasses.filter(c => c.schoolId === selectedSchoolId)
+    : mockClasses;
 
   // Load danh sách đợt khám khi component mount
   useEffect(() => {
@@ -63,6 +245,13 @@ export function StudentTable() {
       loadStudents(selectedCampaignId);
     }
   }, [selectedCampaignId]);
+
+  // Cập nhật selectedCampaignId khi initialCampaignId thay đổi
+  useEffect(() => {
+    if (initialCampaignId) {
+      setSelectedCampaignId(initialCampaignId);
+    }
+  }, [initialCampaignId]);
 
   const loadExamPeriods = async () => {
     try {
@@ -103,8 +292,7 @@ export function StudentTable() {
     setLoading(true);
     setError(null);
     try {
-      const data =
-        await studentService.getStudentsByCampaign(campaignId);
+      const data = await studentService.getStudentsByCampaign(campaignId);
       setStudents(data);
       setBackendConnected(true);
     } catch (err: any) {
@@ -113,8 +301,9 @@ export function StudentTable() {
         console.error("Error loading students:", err);
       }
       setBackendConnected(false);
-      // Không hiển thị lỗi ngay, để user có thể sử dụng các chức năng khác
-      setStudents([]);
+      
+      // Sử dụng mock data khi backend chưa kết nối
+      setStudents(MOCK_STUDENTS);
     } finally {
       setLoading(false);
     }
@@ -274,16 +463,9 @@ export function StudentTable() {
   return (
     <div className="bg-white rounded-lg shadow-sm">
       <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1>Danh sách học sinh</h1>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setIsExamPeriodModalOpen(true)}
-              className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-            >
-              <Settings className="w-4 h-4" />
-              Quản lý đợt khám
-            </button>
+        {/* Title and Buttons Row */}
+        <div className="mb-6">
+          <div className="flex gap-2 mb-4">
             <button
               onClick={() => setIsHealthReportModalOpen(true)}
               className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700"
@@ -316,6 +498,7 @@ export function StudentTable() {
               Thêm học sinh
             </button>
           </div>
+          <h1 className="text-xl font-semibold">Danh sách học sinh</h1>
         </div>
 
         {error && (
@@ -334,42 +517,48 @@ export function StudentTable() {
                 <strong>Backend chưa kết nối</strong>
               </p>
               <p className="text-xs">
-                App đang chạy ở chế độ demo. Để sử dụng đầy đủ
-                chức năng:
+                App đang chạy ở chế độ demo với dữ liệu mẫu.
               </p>
-              <ul className="text-xs mt-1 ml-4 list-disc space-y-0.5">
-                <li>Chạy backend Java trên port 8080</li>
-                <li>
-                  Kiểm tra file{" "}
-                  <code className="bg-yellow-100 px-1 rounded">
-                    .env
-                  </code>{" "}
-                  có đúng URL:{" "}
-                  <code className="bg-yellow-100 px-1 rounded">
-                    http://localhost:8080/api
-                  </code>
-                </li>
-                <li>Cấu hình CORS trong backend</li>
-              </ul>
             </div>
           </div>
         )}
 
+        {/* Filters Row */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div>
             <label className="block text-sm text-gray-600 mb-1">
-              Đợt khám
+              Trường học
             </label>
             <select
               className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-              value={selectedCampaignId || ""}
-              onChange={(e) =>
-                setSelectedCampaignId(Number(e.target.value))
-              }
+              value={selectedSchoolId || ""}
+              onChange={(e) => {
+                setSelectedSchoolId(e.target.value ? Number(e.target.value) : null);
+                setSelectedClassId(null); // Reset class when school changes
+              }}
             >
-              {examPeriods.map((period) => (
-                <option key={period.id} value={period.id}>
-                  {period.campaignName} - {period.schoolYear}
+              <option value="">Tất cả trường</option>
+              {mockSchools.map((school) => (
+                <option key={school.id} value={school.id}>
+                  {school.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Lớp học
+            </label>
+            <select
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              value={selectedClassId || ""}
+              onChange={(e) => setSelectedClassId(e.target.value ? Number(e.target.value) : null)}
+              disabled={!selectedSchoolId}
+            >
+              <option value="">Tất cả lớp</option>
+              {filteredClasses.map((cls) => (
+                <option key={cls.id} value={cls.id}>
+                  {cls.name}
                 </option>
               ))}
             </select>
@@ -432,360 +621,107 @@ export function StudentTable() {
                     Địa chỉ
                   </th>
 
-                  {/* Sinh lý danh dinh dưỡng các cước */}
+                  {/* Lớp */}
                   <th
-                    className="border border-gray-300 p-2"
-                    colSpan={2}
+                    className="border border-gray-300 p-2 min-w-[100px]"
+                    rowSpan={3}
                   >
+                    Lớp
+                  </th>
+
+                  {/* Trường học */}
+                  <th
+                    className="border border-gray-300 p-2 min-w-[150px]"
+                    rowSpan={3}
+                  >
+                    Trường học
+                  </th>
+
+                  {/* Rest of headers remain the same */}
+                  <th className="border border-gray-300 p-2" colSpan={2}>
                     Sinh lý danh dinh dưỡng các cước
                   </th>
-
-                  {/* Dinh dưỡng */}
-                  <th
-                    className="border border-gray-300 p-2"
-                    colSpan={4}
-                  >
+                  <th className="border border-gray-300 p-2" colSpan={4}>
                     Dinh dưỡng
                   </th>
-
-                  {/* Mắt */}
-                  <th
-                    className="border border-gray-300 p-2"
-                    colSpan={7}
-                  >
+                  <th className="border border-gray-300 p-2" colSpan={7}>
                     Mắt
                   </th>
-
-                  {/* Răng */}
-                  <th
-                    className="border border-gray-300 p-2"
-                    colSpan={4}
-                  >
+                  <th className="border border-gray-300 p-2" colSpan={4}>
                     Răng
                   </th>
-
-                  {/* Tai mũi họng */}
-                  <th
-                    className="border border-gray-300 p-2"
-                    colSpan={4}
-                  >
+                  <th className="border border-gray-300 p-2" colSpan={4}>
                     Tai mũi họng
                   </th>
-
-                  {/* Cơ xương khớp */}
-                  <th
-                    className="border border-gray-300 p-2"
-                    colSpan={3}
-                  >
+                  <th className="border border-gray-300 p-2" colSpan={3}>
                     Cơ xương khớp
                   </th>
-
-                  {/* Da liễu */}
-                  <th
-                    className="border border-gray-300 p-2"
-                    colSpan={3}
-                  >
+                  <th className="border border-gray-300 p-2" colSpan={3}>
                     Da liễu
                   </th>
-
-                  {/* Tâm thần */}
-                  <th
-                    className="border border-gray-300 p-2"
-                    colSpan={3}
-                  >
+                  <th className="border border-gray-300 p-2" colSpan={3}>
                     Tâm thần
                   </th>
-
-                  {/* Nội khoa */}
-                  <th
-                    className="border border-gray-300 p-2"
-                    colSpan={5}
-                  >
+                  <th className="border border-gray-300 p-2" colSpan={5}>
                     Nội khoa
                   </th>
-
-                  {/* TB chung */}
-                  <th
-                    className="border border-gray-300 p-2"
-                    rowSpan={3}
-                  >
+                  <th className="border border-gray-300 p-2" rowSpan={3}>
                     TB chung
                   </th>
-
-                  {/* Ghi chú */}
-                  <th
-                    className="border border-gray-300 p-2"
-                    rowSpan={3}
-                  >
+                  <th className="border border-gray-300 p-2" rowSpan={3}>
                     Ghi chú
-                  </th>
-
-                  {/* Xóa */}
-                  <th
-                    className="border border-gray-300 p-2"
-                    rowSpan={3}
-                  >
-                    Xóa
                   </th>
                 </tr>
 
-                {/* Second row */}
+                {/* Second and third header rows remain the same */}
                 <tr
                   className="text-white"
                   style={{ backgroundColor: "#2191b0" }}
                 >
-                  {/* Ngày đăng nhận sinh */}
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Nam
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Nữ
-                  </th>
-
-                  {/* Sinh lý */}
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Cân
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Cao
-                  </th>
-
-                  {/* Dinh dưỡng */}
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    SDD
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Thừa cân
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Béo phì
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    VK
-                  </th>
-
-                  {/* Mắt */}
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Cận đúng số
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Cận chưa đúng số
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Viễn thị
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Loạn thị
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Lác
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    TD tật khúc xạ
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    VKM
-                  </th>
-
-                  {/* Răng */}
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Sâu
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Mất
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Hàn
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Viêm lợi
-                  </th>
-
-                  {/* Tai mũi họng */}
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Viêm mũi
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Viêm họng
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Viêm tai
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Giảm thính lực
-                  </th>
-
-                  {/* Cơ xương khớp */}
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Cong CS
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Vẹo CS
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Bệnh khác
-                  </th>
-
-                  {/* Da liễu */}
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Viêm da
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Vẩy nến
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Bệnh khác
-                  </th>
-
-                  {/* Tâm thần */}
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Lo âu
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Trầm cảm
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    RLT
-                  </th>
-
-                  {/* Nội khoa */}
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Hẹp PQ
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Thấp tim
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Bướu cổ
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    DT BS
-                  </th>
-                  <th
-                    className="border border-gray-300 p-1"
-                    rowSpan={2}
-                  >
-                    Bệnh khác
-                  </th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Nam</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Nữ</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Cân</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Cao</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>SDD</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Thừa cân</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Béo phì</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>VK</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Cận đúng số</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Cận chưa đúng số</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Viễn thị</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Loạn thị</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Lác</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>TD tật khúc xạ</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>VKM</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Sâu</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Mất</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Hàn</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Viêm lợi</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Viêm mũi</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Viêm họng</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Viêm tai</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Giảm thính lực</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Cong CS</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Vẹo CS</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Bệnh khác</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Viêm da</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Vẩy nến</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Bệnh khác</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Lo âu</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Trầm cảm</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>RLT</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Hẹp PQ</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Thấp tim</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Bướu cổ</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>DT BS</th>
+                  <th className="border border-gray-300 p-1" rowSpan={2}>Bệnh khác</th>
                 </tr>
               </thead>
               <tbody>
                 {students.map((student, index) => (
                   <tr
                     key={student.id}
-                    className={
-                      index % 2 === 0
-                        ? "bg-white"
-                        : "bg-gray-50"
-                    }
+                    className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
                   >
                     <td className="border border-gray-300 p-2 text-center sticky left-0 bg-inherit z-[5]">
                       {index + 1}
@@ -793,26 +729,25 @@ export function StudentTable() {
                     <td className="border border-gray-300 p-2 sticky left-12 bg-inherit z-[5]">
                       {student.fullName}
                     </td>
-
-                    {/* Ngày sinh */}
                     <td className="border border-gray-300 p-2 text-center">
-                      {student.gender === "MALE"
-                        ? student.dob
-                        : ""}
+                      {student.gender === "MALE" ? student.dob : ""}
                     </td>
                     <td className="border border-gray-300 p-2 text-center">
-                      {student.gender === "FEMALE"
-                        ? student.dob
-                        : ""}
+                      {student.gender === "FEMALE" ? student.dob : ""}
                     </td>
-
-                    {/* Địa chỉ */}
                     <td className="border border-gray-300 p-2 text-xs">
-                      {student.address ||
-                        "Khối 6 Phường Đồi Cung"}
+                      {student.address || "Khối 6 Phường Đồi Cung"}
+                    </td>
+                    
+                    {/* New Columns: Lớp and Trường học */}
+                    <td className="border border-gray-300 p-2 text-xs">
+                      Lớp Mẫu Giáo 1
+                    </td>
+                    <td className="border border-gray-300 p-2 text-xs">
+                      Trường Mầm Non Đồi Cung
                     </td>
 
-                    {/* Cân Cao */}
+                    {/* Rest of the table cells remain the same */}
                     <td className="border border-gray-300 p-2 text-center">
                       <input
                         type="text"
@@ -821,12 +756,9 @@ export function StudentTable() {
                           setStudents((prev) =>
                             prev.map((s) =>
                               s.id === student.id
-                                ? {
-                                    ...s,
-                                    weight: e.target.value,
-                                  }
-                                : s,
-                            ),
+                                ? { ...s, weight: e.target.value }
+                                : s
+                            )
                           );
                         }}
                         className="w-12 text-center border-0 bg-transparent"
@@ -841,12 +773,9 @@ export function StudentTable() {
                           setStudents((prev) =>
                             prev.map((s) =>
                               s.id === student.id
-                                ? {
-                                    ...s,
-                                    height: e.target.value,
-                                  }
-                                : s,
-                            ),
+                                ? { ...s, height: e.target.value }
+                                : s
+                            )
                           );
                         }}
                         className="w-12 text-center border-0 bg-transparent"
@@ -1372,13 +1301,9 @@ export function StudentTable() {
                           setStudents((prev) =>
                             prev.map((s) =>
                               s.id === student.id
-                                ? {
-                                    ...s,
-                                    notifyFamily:
-                                      e.target.value,
-                                  }
-                                : s,
-                            ),
+                                ? { ...s, notifyFamily: e.target.value }
+                                : s
+                            )
                           );
                         }}
                         className="w-full text-xs border-0 bg-transparent"
@@ -1386,20 +1311,7 @@ export function StudentTable() {
                       />
                     </td>
 
-                    {/* Xóa */}
-                    <td className="border border-gray-300 p-2 text-center">
-                      <button
-                        onClick={() =>
-                          handleDelete(
-                            student.id!,
-                            student.fullName,
-                          )
-                        }
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
+                    {/* Removed delete button column */}
                   </tr>
                 ))}
               </tbody>

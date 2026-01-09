@@ -1,6 +1,8 @@
 import { X, Upload, Download, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import medicalResultService from '../services/medicalResultService';
+import { useSchools } from '../hooks/useSchools';
+import { useSchoolClasses } from '../hooks/useSchoolClasses';
 
 interface ImportExcelModalProps {
   isOpen: boolean;
@@ -15,6 +17,28 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
+  // School and Class selection
+  const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(null);
+  const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
+  
+  const { schools, loading: loadingSchools } = useSchools();
+  const { schoolClasses, loading: loadingClasses } = useSchoolClasses();
+
+  // Filter classes based on selected school
+  const filteredClasses = selectedSchoolId
+    ? schoolClasses.filter(cls => {
+        // Lọc theo schoolCode từ classCode (ví dụ: MN001-MG1 -> MN001)
+        const school = schools.find(s => s.id === selectedSchoolId);
+        if (!school) return false;
+        return cls.classCode?.startsWith(school.schoolCode || '');
+      })
+    : schoolClasses;
+
+  // Reset class when school changes
+  useEffect(() => {
+    setSelectedClassId(null);
+  }, [selectedSchoolId]);
 
   if (!isOpen) return null;
 
@@ -59,6 +83,16 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
       return;
     }
 
+    if (!selectedSchoolId) {
+      setError('Vui lòng chọn trường học');
+      return;
+    }
+
+    if (!selectedClassId) {
+      setError('Vui lòng chọn lớp học');
+      return;
+    }
+
     setUploading(true);
     setError(null);
     setSuccess(null);
@@ -84,6 +118,8 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
     setSelectedFile(null);
     setError(null);
     setSuccess(null);
+    setSelectedSchoolId(null);
+    setSelectedClassId(null);
     onClose();
   };
 
@@ -108,11 +144,58 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
             <div className="text-blue-700 text-sm">
               <p className="mb-2">Hướng dẫn import file Excel:</p>
               <ol className="list-decimal list-inside space-y-1 text-xs">
+                <li>Chọn trường và lớp học cần import</li>
                 <li>Tải file mẫu Excel bằng nút bên dưới</li>
                 <li>Điền thông tin học sinh và kết quả khám vào file mẫu</li>
                 <li>Upload file đã điền thông tin</li>
                 <li>Hệ thống sẽ tự động import dữ liệu</li>
               </ol>
+            </div>
+          </div>
+
+          {/* School and Class Selection */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 className="mb-3 font-medium text-gray-900">Chọn trường và lớp học</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {/* School Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Trường học <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={selectedSchoolId || ''}
+                  onChange={(e) => setSelectedSchoolId(Number(e.target.value) || null)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={loadingSchools}
+                >
+                  <option value="">-- Chọn trường --</option>
+                  {schools.map((school) => (
+                    <option key={school.id} value={school.id}>
+                      {school.schoolName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Class Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Lớp học <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={selectedClassId || ''}
+                  onChange={(e) => setSelectedClassId(Number(e.target.value) || null)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={loadingClasses || !selectedSchoolId}
+                >
+                  <option value="">-- Chọn lớp --</option>
+                  {filteredClasses.map((cls) => (
+                    <option key={cls.id} value={cls.id}>
+                      {cls.className}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
@@ -209,7 +292,7 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
           </button>
           <button
             onClick={handleUpload}
-            disabled={!selectedFile || uploading}
+            disabled={!selectedFile || !selectedSchoolId || !selectedClassId || uploading}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm flex items-center gap-2"
           >
             <Upload className="w-4 h-4" />

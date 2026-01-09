@@ -5,25 +5,35 @@ import { StudentTable } from './components/StudentTable';
 import { CampaignListPage } from './components/CampaignListPage';
 import { SchoolManagementPage } from './components/SchoolManagementPage';
 import { StatisticsPage } from './components/StatisticsPage';
+import { ExamPeriod } from './services/examPeriodService';
 
 export default function App() {
   const [selectedMenu, setSelectedMenu] = useState('y-te-hoc-duong');
   const [selectedSubMenu, setSelectedSubMenu] = useState<string>('campaigns'); // campaigns, students, schools, statistics
+  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(null);
+
+  // Handler khi chọn đợt khám từ CampaignListPage
+  const handleSelectCampaign = (campaign: ExamPeriod) => {
+    if (campaign.id) {
+      setSelectedCampaignId(campaign.id);
+    }
+    setSelectedSubMenu('students'); // Chuyển sang tab danh sách học sinh
+  };
 
   // Render content dựa trên menu được chọn
   const renderContent = () => {
     if (selectedMenu === 'y-te-hoc-duong') {
       switch (selectedSubMenu) {
         case 'campaigns':
-          return <CampaignListPage />;
+          return <CampaignListPage onSelectCampaign={handleSelectCampaign} />;
         case 'students':
-          return <StudentTable />;
+          return <StudentTable key={selectedCampaignId} initialCampaignId={selectedCampaignId} />;
         case 'schools':
           return <SchoolManagementPage />;
         case 'statistics':
           return <StatisticsPage />;
         default:
-          return <CampaignListPage />;
+          return <CampaignListPage onSelectCampaign={handleSelectCampaign} />;
       }
     }
 
@@ -50,7 +60,7 @@ export default function App() {
       );
     }
 
-    return <CampaignListPage />;
+    return <CampaignListPage onSelectCampaign={handleSelectCampaign} />;
   };
 
   return (

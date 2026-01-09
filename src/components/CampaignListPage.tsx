@@ -90,10 +90,13 @@ export function CampaignListPage({ onSelectCampaign, onCreateCampaign }: Campaig
               </p>
             )}
           </div>
-          <Button onClick={onCreateCampaign} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="w-4 h-4 mr-2" />
+          <button
+            onClick={onCreateCampaign}
+            className="px-4 py-2 bg-white border-2 border-gray-900 text-gray-900 rounded-md hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
             Thêm mới
-          </Button>
+          </button>
         </div>
 
         {/* Year Tabs */}
@@ -128,26 +131,26 @@ export function CampaignListPage({ onSelectCampaign, onCreateCampaign }: Campaig
             <p className="text-gray-500">Không tìm thấy đợt khám nào</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-6">
             {filteredCampaigns.map((campaign: ExamPeriod) => (
               <Card
                 key={campaign.id}
-                className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
+                className="p-5 hover:shadow-lg transition-shadow cursor-pointer rounded-xl border-2"
                 onClick={() => onSelectCampaign?.(campaign)}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-blue-600" />
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-6 h-6 text-blue-600" />
                     </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900">{campaign.campaignName}</h3>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 truncate">{campaign.campaignName}</h3>
                       {campaign.schoolYear && (
-                        <p className="text-xs text-gray-500">Năm học {campaign.schoolYear}</p>
+                        <p className="text-sm text-gray-500">Năm học {campaign.schoolYear}</p>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     {getStatusBadge(campaign.status)}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent) => e.stopPropagation()}>
@@ -180,14 +183,14 @@ export function CampaignListPage({ onSelectCampaign, onCreateCampaign }: Campaig
 
                 <div className="space-y-2 mb-3">
                   <div className="flex items-center text-sm text-gray-600">
-                    <Calendar className="w-4 h-4 mr-2" />
+                    <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
                     <span>
                       {formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}
                     </span>
                   </div>
                   {(campaign.totalStudents !== undefined || campaign.totalStudentsExamined !== undefined) && (
                     <div className="flex items-center text-sm text-gray-600">
-                      <Users className="w-4 h-4 mr-2" />
+                      <Users className="w-4 h-4 mr-2 flex-shrink-0" />
                       <span>
                         {campaign.totalStudentsExamined || 0} / {campaign.totalStudents || 0} học sinh
                       </span>
@@ -196,7 +199,7 @@ export function CampaignListPage({ onSelectCampaign, onCreateCampaign }: Campaig
                 </div>
 
                 {campaign.note && (
-                  <p className="text-xs text-gray-500 line-clamp-2">{campaign.note}</p>
+                  <p className="text-sm text-gray-500 line-clamp-2">{campaign.note}</p>
                 )}
               </Card>
             ))}

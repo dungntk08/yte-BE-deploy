@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HealthIndicatorsForm } from './HealthIndicatorsForm';
 
 interface Student {
@@ -20,6 +20,54 @@ interface EditStudentModalProps {
   onSave: (student: Student) => void;
 }
 
+// Mock health data mẫu khi chưa có BE
+const MOCK_HEALTH_DATA = {
+  // Chỉ số dinh dưỡng
+  sdd: false,
+  overweight: false,
+  obesity: false,
+  
+  // Mắt
+  myopia_correct: false,
+  myopia_incorrect: false,
+  hyperopia: false,
+  astigmatism: false,
+  strabismus: false,
+  refractive_error: false,
+  vkm: false,
+  
+  // Tai - Mũi - Họng
+  ear_infection: false,
+  hearing_loss: false,
+  nose_inflammation: false,
+  throat_inflammation: false,
+  
+  // Răng - Hàm - Mặt
+  cavities: false,
+  gingivitis: false,
+  malocclusion: false,
+  
+  // Cơ - Xương - Khớp
+  scoliosis: false,
+  flat_feet: false,
+  limb_deformity: false,
+  
+  // Da liễu
+  eczema: false,
+  fungal_infection: false,
+  skin_allergy: false,
+  
+  // Tâm thần
+  anxiety: false,
+  depression: false,
+  behavioral_disorder: false,
+  
+  // Nội khoa
+  heart_disease: false,
+  respiratory_disease: false,
+  digestive_disease: false,
+};
+
 export function EditStudentModal({ student, onClose, onSave }: EditStudentModalProps) {
   if (!student) return null;
 
@@ -34,7 +82,33 @@ export function EditStudentModal({ student, onClose, onSave }: EditStudentModalP
     notify_family: '',
   });
 
-  const [healthData, setHealthData] = useState(student.healthData || {});
+  const [healthData, setHealthData] = useState(
+    student.healthData && Object.keys(student.healthData).length > 0 
+      ? student.healthData 
+      : MOCK_HEALTH_DATA
+  );
+
+  // Cập nhật formData và healthData khi student thay đổi
+  useEffect(() => {
+    if (student) {
+      setFormData({
+        full_name: student.name,
+        gender: student.gender,
+        dob: student.birthDate,
+        identity_number: student.citizenId,
+        address: 'Khối 6 Phường Đồi Cung',
+        weight: '',
+        height: '',
+        notify_family: '',
+      });
+      
+      setHealthData(
+        student.healthData && Object.keys(student.healthData).length > 0 
+          ? student.healthData 
+          : MOCK_HEALTH_DATA
+      );
+    }
+  }, [student]);
 
   const handleSubmit = () => {
     onSave({ ...student, ...formData, healthData });
@@ -61,7 +135,7 @@ export function EditStudentModal({ student, onClose, onSave }: EditStudentModalP
             <div className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">
               <span className="text-xs">i</span>
             </div>
-            <p className="text-blue-700 text-sm">Chỉnh sửa thông tin học sinh (chỉ cho phép sửa: Địa chỉ, Cân nặng, Chiều cao, Thông báo gia đình)</p>
+            <p className="text-blue-700 text-sm">Chỉnh sửa thông tin học sinh (chỉ cho phép sửa: Địa chỉ, Cân nặng, Chiều cao, Kết quả khám sức khỏe, Thông báo gia đình)</p>
           </div>
 
           {/* Student Information - Read Only */}
@@ -120,60 +194,26 @@ export function EditStudentModal({ student, onClose, onSave }: EditStudentModalP
           {/* Editable Information */}
           <div className="mb-6">
             <h3 className="mb-4">
-              <span>Thông tin có thể chỉnh sửa</span>
+              <span>Địa chỉ</span>
             </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <label className="block text-sm text-gray-600 mb-1">Địa chỉ</label>
-                <input
-                  type="text"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="Nhập địa chỉ"
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Cân nặng (kg)</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.weight}
-                  onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                  placeholder="Nhập cân nặng"
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Chiều cao (cm)</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.height}
-                  onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                  placeholder="Nhập chiều cao"
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                />
-              </div>
-              <div className="col-span-2">
-                <label className="block text-sm text-gray-600 mb-1">Thông báo gia đình</label>
-                <textarea
-                  value={formData.notify_family}
-                  onChange={(e) => setFormData({ ...formData, notify_family: e.target.value })}
-                  placeholder="Nhập thông báo gửi gia đình"
-                  rows={3}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                />
-              </div>
+            <div className="col-span-2">
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                placeholder="Nhập địa chỉ"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              />
             </div>
           </div>
 
           {/* Health Indicators Form */}
           <HealthIndicatorsForm
-            healthData={student.healthData}
-            onHealthDataChange={(healthData) => {
-              setHealthData(healthData);
-            }}
+            formData={formData}
+            setFormData={setFormData}
+            healthData={healthData}
+            setHealthData={setHealthData}
+            readOnly={false}
           />
         </div>
 

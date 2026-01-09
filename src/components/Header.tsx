@@ -9,7 +9,6 @@ interface HeaderProps {
 export function Header({ selectedSubMenu, onSubMenuSelect }: HeaderProps) {
   const subMenuItems = [
     { id: 'campaigns', label: 'Thông tin đợt khám', icon: ClipboardList },
-    { id: 'students', label: 'Thông tin học sinh', icon: Users },
     { id: 'schools', label: 'Quản lý trường học', icon: School },
     { id: 'statistics', label: 'Thống kê', icon: BarChart3 },
   ];

@@ -109,90 +109,155 @@ export function StatisticsPage() {
   }, [view, selectedStudentId]);
 
   const loadExamStatistics = async () => {
-    if (!selectedCampaignId) return;
+  if (!selectedCampaignId) return;
+  
+  setLoading(true);
+  try {
+    const [overview, schools] = await Promise.all([
+      statisticsService.getCampaignOverview(selectedCampaignId),
+      statisticsService.getSchoolStatistics(selectedCampaignId),
+    ]);
+    setCampaignOverview(overview);
+    setSchoolStats(schools);
     
-    setLoading(true);
-    try {
-      const [overview, schools] = await Promise.all([
-        statisticsService.getCampaignOverview(selectedCampaignId),
-        statisticsService.getSchoolStatistics(selectedCampaignId),
-      ]);
-      setCampaignOverview(overview);
-      setSchoolStats(schools);
-      
-      // Auto select first school
-      if (schools.length > 0) {
-        setSelectedSchoolId(schools[0].schoolId);
-      }
-    } catch (error) {
-      console.error('Error loading exam statistics:', error);
-      toast.error('Không thể tải dữ liệu thống kê');
-    } finally {
-      setLoading(false);
+    // Auto select first school
+    if (schools.length > 0) {
+      setSelectedSchoolId(schools[0].schoolId);
     }
-  };
-
-  const loadClassStatistics = async () => {
-    if (!selectedCampaignId || !selectedSchoolId) return;
+  } catch (error) {
+    console.error('Error loading exam statistics:', error);
     
-    try {
-      const classes = await statisticsService.getClassStatistics(selectedCampaignId, selectedSchoolId);
-      setClassStats(classes);
-    } catch (error) {
-      console.error('Error loading class statistics:', error);
-      toast.error('Không thể tải thống kê theo lớp');
-    }
-  };
-
-  const loadDiseaseStatistics = async () => {
-    if (!selectedCampaignId) return;
+    // Sử dụng dữ liệu mẫu khi BE chưa kết nối
+    const mockOverview: CampaignOverviewResponse = {
+      totalStudents: 1200,
+      totalStudentsExamined: 1000,
+    };
     
-    setLoading(true);
-    try {
-      const diseases = await statisticsService.getDiseaseStatistics(selectedCampaignId);
-      setDiseaseStats(diseases);
-    } catch (error) {
-      console.error('Error loading disease statistics:', error);
-      toast.error('Không thể tải thống kê theo bệnh');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadStudentYearStatistics = async () => {
-    if (!selectedStudentId) return;
+    const mockSchools: SchoolStatisticResponse[] = [
+      { schoolId: 1, schoolName: 'Trường Mầm Non Đồi Cung', totalStudents: 300, examinedStudents: 245 },
+      { schoolId: 2, schoolName: 'Trường Mầm Non Hoa Sen', totalStudents: 200, examinedStudents: 180 },
+      { schoolId: 3, schoolName: 'Trường Mầm Non Ánh Dương', totalStudents: 400, examinedStudents: 320 },
+      { schoolId: 4, schoolName: 'Trường Mầm Non Bình Minh', totalStudents: 180, examinedStudents: 150 },
+      { schoolId: 5, schoolName: 'Trường Mầm Non Sao Mai', totalStudents: 350, examinedStudents: 280 },
+    ];
     
-    setLoading(true);
-    try {
-      const yearStats = await statisticsService.getStudentYearStatistics(selectedStudentId);
-      setStudentYearStats(yearStats);
-    } catch (error) {
-      console.error('Error loading student year statistics:', error);
-      toast.error('Không thể tải thống kê theo năm');
-    } finally {
-      setLoading(false);
+    setCampaignOverview(mockOverview);
+    setSchoolStats(mockSchools);
+    
+    if (mockSchools.length > 0) {
+      setSelectedSchoolId(mockSchools[0].schoolId);
     }
-  };
+    
+    toast.error('Đang sử dụng dữ liệu mẫu (Backend chưa kết nối)');
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const handleExamCardClick = () => {
-    if (campaigns.length === 0) {
-      toast.error('Chưa có đợt khám nào');
-      return;
-    }
-    // Auto select first campaign
-    setSelectedCampaignId(campaigns[0].id);
+const loadClassStatistics = async () => {
+  if (!selectedCampaignId || !selectedSchoolId) return;
+  
+  try {
+    const classes = await statisticsService.getClassStatistics(selectedCampaignId, selectedSchoolId);
+    setClassStats(classes);
+  } catch (error) {
+    console.error('Error loading class statistics:', error);
+    
+    // Dữ liệu mẫu cho các lớp
+    const mockClasses: ClassStatisticResponse[] = [
+      { classId: 1, className: 'Lớp Mẫu Giáo 1', totalStudent: 25, examinedStudents: 23 },
+      { classId: 2, className: 'Lớp Mẫu Giáo 2', totalStudent: 28, examinedStudents: 25 },
+      { classId: 3, className: 'Lớp Mẫu Giáo 3', totalStudent: 30, examinedStudents: 28 },
+      { classId: 4, className: 'Lớp Nhà Trẻ 1', totalStudent: 20, examinedStudents: 18 },
+      { classId: 5, className: 'Lớp Nhà Trẻ 2', totalStudent: 22, examinedStudents: 20 },
+    ];
+    
+    setClassStats(mockClasses);
+    toast.error('Đang sử dụng dữ liệu mẫu cho lớp học');
+  }
+};
+
+const loadDiseaseStatistics = async () => {
+  if (!selectedCampaignId) return;
+  
+  setLoading(true);
+  try {
+    const diseases = await statisticsService.getDiseaseStatistics(selectedCampaignId);
+    setDiseaseStats(diseases);
+  } catch (error) {
+    console.error('Error loading disease statistics:', error);
+    
+    // Dữ liệu mẫu cho bệnh
+    const mockDiseases: DiseaseStatisticResponse[] = [
+      { groupId: 1, groupName: 'Răng Hàm Mặt', medicalIndicatorId: 1, indicatorName: 'Sâu răng', subIndicatorId: null, subIndicatorName: null, totalStudentAffected: 145 },
+      { groupId: 2, groupName: 'Mắt', medicalIndicatorId: 2, indicatorName: 'Cận thị', subIndicatorId: 21, subIndicatorName: 'Cận thị nhẹ', totalStudentAffected: 45 },
+      { groupId: 2, groupName: 'Mắt', medicalIndicatorId: 2, indicatorName: 'Cận thị', subIndicatorId: 22, subIndicatorName: 'Cận thị nặng', totalStudentAffected: 44 },
+      { groupId: 3, groupName: 'Dinh Dưỡng', medicalIndicatorId: 3, indicatorName: 'Béo phì', subIndicatorId: null, subIndicatorName: null, totalStudentAffected: 67 },
+      { groupId: 3, groupName: 'Dinh Dưỡng', medicalIndicatorId: 4, indicatorName: 'Suy dinh dưỡng', subIndicatorId: null, subIndicatorName: null, totalStudentAffected: 34 },
+      { groupId: 4, groupName: 'Tai Mũi Họng', medicalIndicatorId: 5, indicatorName: 'Viêm họng', subIndicatorId: null, subIndicatorName: null, totalStudentAffected: 123 },
+      { groupId: 4, groupName: 'Tai Mũi Họng', medicalIndicatorId: 6, indicatorName: 'Viêm tai', subIndicatorId: null, subIndicatorName: null, totalStudentAffected: 45 },
+      { groupId: 5, groupName: 'Da Liễu', medicalIndicatorId: 7, indicatorName: 'Dị ứng da', subIndicatorId: null, subIndicatorName: null, totalStudentAffected: 56 },
+      { groupId: 6, groupName: 'Hô Hấp', medicalIndicatorId: 8, indicatorName: 'Hen suyễn', subIndicatorId: null, subIndicatorName: null, totalStudentAffected: 23 },
+    ];
+    
+    setDiseaseStats(mockDiseases);
+    toast.error('Đang sử dụng dữ liệu mẫu cho bệnh');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const loadStudentYearStatistics = async () => {
+  if (!selectedStudentId) return;
+  
+  setLoading(true);
+  try {
+    const yearStats = await statisticsService.getStudentYearStatistics(selectedStudentId);
+    setStudentYearStats(yearStats);
+  } catch (error) {
+    console.error('Error loading student year statistics:', error);
+    
+    // Dữ liệu mẫu cho thống kê theo năm
+    const mockYearStats: StudentYearStatisticResponse[] = [
+      { schoolYear: '2021-2022', totalDiseaseCount: 5 },
+      { schoolYear: '2022-2023', totalDiseaseCount: 4 },
+      { schoolYear: '2023-2024', totalDiseaseCount: 3 },
+      { schoolYear: '2024-2025', totalDiseaseCount: 2 },
+      { schoolYear: '2025-2026', totalDiseaseCount: 2 },
+    ];
+    
+    setStudentYearStats(mockYearStats);
+    toast.error('Đang sử dụng dữ liệu mẫu cho thống kê học sinh');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleExamCardClick = () => {
+  if (campaigns.length === 0) {
+    toast.error('Chưa có đợt khám nào');
+    return;
+  }
+  // Auto select first campaign
+  const firstCampaign = campaigns[0];
+  if (firstCampaign?.id) {
+    setSelectedCampaignId(firstCampaign.id);
     setView('exam-detail');
-  };
+  }
+};
 
-  const handleStudentCardClick = () => {
-    if (students.length === 0) {
-      toast.error('Chưa có học sinh nào');
-      return;
-    }
-    // Auto select first student
-    setSelectedStudentId(students[0].id);
+const handleStudentCardClick = () => {
+  if (students.length === 0) {
+    toast.error('Chưa có học sinh nào');
+    return;
+  }
+  // Auto select first student
+  const firstStudent = students[0];
+  if (firstStudent?.id) {
+    setSelectedStudentId(firstStudent.id);
     setView('student-detail');
-  };
+  }
+};
 
   // Prepare data for pie chart
   const selectedSchool = schoolStats.find(s => s.schoolId === selectedSchoolId);
