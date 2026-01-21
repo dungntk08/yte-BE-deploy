@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { School, Plus, Search, Building2, Users, MoreVertical, Edit, Trash2 } from 'lucide-react';
 import { useSchools } from '../hooks/useSchools';
 import { useSchoolClasses } from '../hooks/useSchoolClasses';
+import schoolClassService from '../services/schoolClassService';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
@@ -32,6 +33,8 @@ export function SchoolManagementPage() {
   const { schoolClasses, loading: classesLoading, deleteSchoolClass, refreshSchoolClasses } = useSchoolClasses();
   
   const [selectedSchool, setSelectedSchool] = useState<SchoolResponseDTO | null>(null);
+  const [selectedSchoolClasses, setSelectedSchoolClasses] = useState<SchoolClassResponseDTO[]>([]);
+  const [loadingSelectedClasses, setLoadingSelectedClasses] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddSchoolModal, setShowAddSchoolModal] = useState(false);
   const [showEditSchoolModal, setShowEditSchoolModal] = useState(false);
@@ -40,16 +43,33 @@ export function SchoolManagementPage() {
   const [editingSchool, setEditingSchool] = useState<SchoolResponseDTO | null>(null);
   const [editingClass, setEditingClass] = useState<SchoolClassResponseDTO | null>(null);
 
+  // Load classes for selected school
+  useEffect(() => {
+    if (selectedSchool) {
+      loadClassesForSchool(selectedSchool.id);
+    } else {
+      setSelectedSchoolClasses([]);
+    }
+  }, [selectedSchool]);
+
+  const loadClassesForSchool = async (schoolId: number) => {
+    setLoadingSelectedClasses(true);
+    try {
+      const classes = await schoolClassService.getSchoolClassesBySchool(schoolId);
+      setSelectedSchoolClasses(classes);
+    } catch (error) {
+      console.error('Error loading classes:', error);
+      setSelectedSchoolClasses([]);
+    } finally {
+      setLoadingSelectedClasses(false);
+    }
+  };
+
   // Filter schools by search
   const filteredSchools = schools.filter(school =>
     school.schoolName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     school.schoolCode.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Get classes for selected school
-  const schoolClassesForSelected = selectedSchool
-    ? schoolClasses.filter(c => c.classCode.startsWith(selectedSchool.schoolCode))
-    : [];
 
   const handleEditSchool = (school: SchoolResponseDTO) => {
     setEditingSchool(school);
@@ -65,6 +85,10 @@ export function SchoolManagementPage() {
     if (window.confirm(`Bạn có chắc chắn muốn xóa lớp "${className}"?`)) {
       try {
         await deleteSchoolClass(id);
+        // Reload classes for selected school
+        if (selectedSchool) {
+          loadClassesForSchool(selectedSchool.id);
+        }
       } catch (error) {
         alert('Không thể xóa lớp học. Vui lòng thử lại.');
       }
@@ -82,110 +106,111 @@ export function SchoolManagementPage() {
   return (
     <div className="min-h-screen bg-gray-50" style={{ padding: '48px 130px' }}>
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-[30px] font-bold text-gray-900">Quản lý trường học</h1>
-          <Button
-            onClick={() => setShowAddSchoolModal(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Thêm trường học
-          </Button>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative w-1/5">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Tìm kiếm trường học..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+      <div className="mb-6 pb-8 mt-2.5 border-b border-gray-200" style={{ paddingBottom: '36px' }}>
+        <div className="flex items-center justify-between gap-4">
+          <h1 style={{ fontSize: '30px', fontWeight: 'bold' }} className="text-gray-900">Quản lý trường học</h1>
+          
+          <div className="flex items-center gap-4">
+            {/* Search Bar */}
+            <div className="relative" style={{ width: '300px' }}>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Tìm kiếm trường học..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 w-full rounded-full"
+              />
+            </div>
+            
+            <button
+              onClick={() => setShowAddSchoolModal(true)}
+              className="flex items-center gap-2 px-4 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Thêm mới</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-12 gap-6">
-        {/* Schools List */}
-        <div className="col-span-4">
-          <Card className="p-4">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Building2 className="w-5 h-5" />
-              Danh sách trường học
-            </h2>
-            <div className="space-y-2 max-h-[600px] overflow-y-auto">
-              {filteredSchools.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">Không tìm thấy trường học nào</p>
-              ) : (
-                filteredSchools.map((school) => (
-                  <div
-                    key={school.id}
-                    onClick={() => setSelectedSchool(school)}
-                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                      selectedSchool?.id === school.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-gray-900 truncate">{school.schoolName}</h3>
-                        <p className="text-sm text-gray-500">Mã: {school.schoolCode}</p>
-                        <p className="text-xs text-gray-400 truncate">{school.address}</p>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditSchool(school);
-                          }}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Chỉnh sửa
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                ))
-              )}
+      <div className="space-y-6">
+        {/* Schools Grid */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Building2 className="w-5 h-5" />
+            Danh sách trường học
+          </h2>
+          {filteredSchools.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">Không tìm thấy trường học nào</p>
             </div>
-          </Card>
+          ) : (
+            <div className="grid grid-cols-3 gap-6">
+              {filteredSchools.map((school) => (
+                <Card
+                  key={school.id}
+                  onClick={() => setSelectedSchool(school)}
+                  className={`p-4 border-2 rounded-lg hover:shadow-lg transition-all cursor-pointer ${
+                    selectedSchool?.id === school.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-300 hover:border-blue-400'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-medium text-gray-900 truncate">{school.schoolName}</h3>
+                        <p className="text-xs text-gray-500">Mã: {school.schoolCode}</p>
+                      </div>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          handleEditSchool(school);
+                        }}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Chỉnh sửa
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <p className="text-xs text-gray-400 line-clamp-2">{school.address}</p>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Classes List */}
-        <div className="col-span-8">
+        {selectedSchool && (
           <Card className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
+              <h2 style={{ fontSize: '18px', fontWeight: '600' }} className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                {selectedSchool ? `Danh sách lớp - ${selectedSchool.schoolName}` : 'Danh sách lớp học'}
+                Danh sách lớp - {selectedSchool.schoolName}
               </h2>
-              {selectedSchool && (
-                <Button
-                  onClick={() => setShowAddClassModal(true)}
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Thêm lớp
-                </Button>
-              )}
+              <button
+                onClick={() => setShowAddClassModal(true)}
+                className="flex items-center gap-2 px-4 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Thêm mới</span>
+              </button>
             </div>
 
-            {!selectedSchool ? (
-              <div className="text-center py-12 text-gray-500">
-                Vui lòng chọn một trường học để xem danh sách lớp
-              </div>
-            ) : classesLoading ? (
+            {loadingSelectedClasses ? (
               <div className="text-center py-12 text-gray-500">Đang tải...</div>
-            ) : schoolClassesForSelected.length === 0 ? (
+            ) : selectedSchoolClasses.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
                 Chưa có lớp học nào
               </div>
@@ -194,45 +219,41 @@ export function SchoolManagementPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Mã lớp</TableHead>
                       <TableHead>Tên lớp</TableHead>
                       <TableHead>Khối</TableHead>
                       <TableHead>Sĩ số</TableHead>
                       <TableHead>Năm học</TableHead>
-                      <TableHead className="w-[80px]"></TableHead>
+                      <TableHead className="w-[100px] text-right"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {schoolClassesForSelected.map((schoolClass) => (
+                    {selectedSchoolClasses.map((schoolClass) => (
                       <TableRow key={schoolClass.id}>
-                        <TableCell className="font-medium">{schoolClass.classCode}</TableCell>
-                        <TableCell>{schoolClass.className}</TableCell>
+                        <TableCell className="font-medium">{schoolClass.className}</TableCell>
                         <TableCell>
                           <Badge variant="outline">Khối {schoolClass.grade}</Badge>
                         </TableCell>
                         <TableCell>{schoolClass.totalStudent || 0} học sinh</TableCell>
                         <TableCell>{schoolClass.schoolYear}</TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleEditClass(schoolClass)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Chỉnh sửa
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-red-600"
-                                onClick={() => handleDeleteClass(schoolClass.id, schoolClass.className)}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Xóa
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditClass(schoolClass)}
+                              className="h-8 w-8 p-0 text-gray-600 hover:text-blue-600"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteClass(schoolClass.id, schoolClass.className)}
+                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -241,7 +262,7 @@ export function SchoolManagementPage() {
               </div>
             )}
           </Card>
-        </div>
+        )}
       </div>
 
       {/* Modals */}
@@ -278,7 +299,10 @@ export function SchoolManagementPage() {
           school={selectedSchool}
           onClose={() => setShowAddClassModal(false)}
           onSuccess={() => {
-            refreshSchoolClasses();
+            // Reload classes for selected school
+            if (selectedSchool) {
+              loadClassesForSchool(selectedSchool.id);
+            }
             setShowAddClassModal(false);
           }}
         />
@@ -294,7 +318,10 @@ export function SchoolManagementPage() {
             setEditingClass(null);
           }}
           onSuccess={() => {
-            refreshSchoolClasses();
+            // Reload classes for selected school
+            if (selectedSchool) {
+              loadClassesForSchool(selectedSchool.id);
+            }
             setShowEditClassModal(false);
             setEditingClass(null);
           }}

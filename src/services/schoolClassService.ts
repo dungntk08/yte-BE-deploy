@@ -16,6 +16,7 @@ export interface SchoolClassResponseDTO {
   grade: number;
   totalStudent: number;
   schoolYear: string;
+  schoolId?: number; // Optional vì backend có thể chưa trả về
 }
 
 const schoolClassService = {
@@ -69,6 +70,17 @@ const schoolClassService = {
       await api.delete(`/school-classes/${id}`);
     } catch (error) {
       console.error('Error deleting school class:', error);
+      throw error;
+    }
+  },
+
+  // Lấy danh sách lớp học theo trường
+  getSchoolClassesBySchool: async (schoolId: number): Promise<SchoolClassResponseDTO[]> => {
+    try {
+      const response = await api.get(`/school-classes/by-school/${schoolId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching school classes by school:', error);
       throw error;
     }
   },

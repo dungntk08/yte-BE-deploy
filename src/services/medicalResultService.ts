@@ -11,21 +11,40 @@ export interface UpdateMedicalResultRequest {
 }
 
 class MedicalResultService {
-  // Export Excel kết quả khám
-  async exportExcel(campaignId: number): Promise<Blob> {
-    const response = await apiClient.get('/medical-results/export', {
-      params: { campaignId },
+  // Export Excel kết quả khám (danh sách học sinh đã khám)
+  async exportExcel(campaignId: number, schoolId?: number, classId?: number): Promise<Blob> {
+    const params = new URLSearchParams();
+    if (schoolId) params.append('schoolId', schoolId.toString());
+    if (classId) params.append('classId', classId.toString());
+    
+    const url = `/medical-results/export-medical-result/${campaignId}${params.toString() ? '?' + params.toString() : ''}`;
+    
+    const response = await apiClient.get(url, {
+      responseType: 'blob',
+    });
+    return response.data;
+  }
+
+  // Export Excel báo cáo tổng hợp kết quả khám
+  async exportStatisticExcel(campaignId: number, schoolId?: number, classId?: number): Promise<Blob> {
+    const params = new URLSearchParams();
+    if (schoolId) params.append('schoolId', schoolId.toString());
+    if (classId) params.append('classId', classId.toString());
+    
+    const url = `/medical-results/export-statistic-medical-result/${campaignId}${params.toString() ? '?' + params.toString() : ''}`;
+    
+    const response = await apiClient.get(url, {
       responseType: 'blob',
     });
     return response.data;
   }
 
   // Import Excel kết quả khám
-  async importExcel(campaignId: number, file: File): Promise<string> {
+  async importExcel(campaignId: number, schoolId: number, classId: number, file: File): Promise<string> {
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await apiClient.post(`/medical-results/import-excel/${campaignId}`, formData, {
+    const response = await apiClient.post(`/medical-results/import-excel/${campaignId}/${schoolId}/${classId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -34,7 +53,7 @@ class MedicalResultService {
   }
 
   // Tải file mẫu Excel
-  async downloadTemplate(campaignId: number): Promise<Blob> {
+  async downloadTemplate(campaignId: number, schoolId: number, classId: number): Promise<Blob> {
     const response = await apiClient.get(`/medical-results/export-template/${campaignId}`, {
       responseType: 'blob',
     });
@@ -44,6 +63,20 @@ class MedicalResultService {
   // Cập nhật kết quả khám (nếu có API riêng)
   async updateMedicalResult(data: UpdateMedicalResultRequest): Promise<MedicalResultDetail> {
     const response = await apiClient.post('/medical-results', data);
+    return response.data;
+  }
+
+  // Cập nhật kết quả khám chi tiết theo ID
+  async updateMedicalResultDetail(id: number, resultValue: boolean): Promise<MedicalResultDetail> {
+    const response = await apiClient.put(`/medical-result-details/${id}`, { 
+      resultValue 
+    });
+    return response.data;
+  }
+
+  // Lấy chi tiết medical result theo ID
+  async getMedicalResultDetailById(id: number): Promise<MedicalResultDetail> {
+    const response = await apiClient.get(`/medical-result-details/${id}`);
     return response.data;
   }
 }

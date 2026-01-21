@@ -19,12 +19,22 @@ export interface Student {
   fullName: string;
   gender: 'MALE' | 'FEMALE';
   dob: string;
+  className?: string;
   address?: string;
   identityNumber: string;
   weight?: string;
   height?: string;
   notifyFamily?: string;
   medicalResults?: MedicalResultDetail[];
+  schoolName?: string;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
 }
 
 export interface StudentRequest {
@@ -34,15 +44,31 @@ export interface StudentRequest {
   dob: string;
   address?: string;
   identityNumber: string;
-  weight?: string;
-  height?: string;
+  weight?: number | null;
+  height?: number | null;
   notifyFamily?: string;
+  className?: string;
 }
 
 class StudentService {
-  // Lấy danh sách học sinh theo đợt khám
-  async getStudentsByCampaign(campaignId: number): Promise<Student[]> {
-    const response = await apiClient.get(`/students/campaign/${campaignId}`);
+  // Lấy danh sách học sinh theo đợt khám (có hỗ trợ search keyword, filter và phân trang)
+  async getStudentsByCampaign(
+    campaignId: number, 
+    keyword?: string | null,
+    schoolId?: number | null,
+    schoolClassId?: number | null,
+    page: number = 0,
+    size: number = 50
+  ): Promise<PageResponse<Student>> {
+    const params: any = {
+      page,
+      size
+    };
+    if (keyword) params.keyword = keyword;
+    if (schoolId) params.schoolId = schoolId;
+    if (schoolClassId) params.schoolClassId = schoolClassId;
+    
+    const response = await apiClient.get(`/students/campaign/${campaignId}`, { params });
     return response.data;
   }
 

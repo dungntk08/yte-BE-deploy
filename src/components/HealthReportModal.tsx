@@ -1,62 +1,100 @@
 import { X, Download, Printer } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import apiClient from '../services/api';
+
+interface DiseaseReportDTO {
+  diseaseName: string;
+  totalCase: number;
+}
+
+interface SchoolResponseDTO {
+  id: number;
+  schoolCode?: string;
+  schoolName: string;
+  address?: string;
+}
+
+interface MedicalCampaignResponseDTO {
+  id: number;
+  school: SchoolResponseDTO;
+  schoolYear: string;
+  campaignName: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  note?: string;
+  totalStudents: number;
+  totalStudentsExamined: number;
+}
+
+interface MedicalResultReport {
+  medicalCampaignResponseDTO: MedicalCampaignResponseDTO;
+  diseaseReports: DiseaseReportDTO[];
+  // Thừa cân
+  overWeightCount: number;
+  // Suy dinh dưỡng
+  underWeightCount: number;
+  // Béo phì
+  obesityCount: number;
+  // Tỷ lệ khám
+  averageExamined: number;
+}
 
 interface HealthReportModalProps {
   isOpen: boolean;
   onClose: () => void;
   students: any[];
+  campaignId?: number;
 }
 
-export function HealthReportModal({ isOpen, onClose, students }: HealthReportModalProps) {
+export function HealthReportModal({ isOpen, onClose, students, campaignId }: HealthReportModalProps) {
+  const [reportData, setReportData] = useState<MedicalResultReport | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen && campaignId) {
+      loadReportData(campaignId);
+    }
+  }, [isOpen, campaignId]);
+
+  const loadReportData = async (campaignId: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await apiClient.get<MedicalResultReport>(
+        `/medical-result-details/medicalReport/${campaignId}`
+      );
+      setReportData(response.data);
+    } catch (err: any) {
+      console.error('Error loading report data:', err);
+      setError(err.response?.data?.message || 'Không thể tải dữ liệu báo cáo');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
-  // Calculate statistics
-  const totalStudents = students.length;
-  const examinedStudents = students.filter(s => s.status === 'Đã khám').length;
-  const examinationRate = totalStudents > 0 ? ((examinedStudents / totalStudents) * 100).toFixed(1) : 0;
+  // Use data from API if available, otherwise fallback to student counting
+  const campaign = reportData?.medicalCampaignResponseDTO;
+  const diseaseReports = reportData?.diseaseReports || [];
 
-  // Count health issues
-  const countHealthIssue = (field: string) => {
-    return students.filter(s => s.healthData?.[field] === true).length;
+  const totalStudents = campaign?.totalStudents || students.length;
+  const examinedStudents = campaign?.totalStudentsExamined || students.filter(s => s.status === 'Đã khám').length;
+  const examinationRate = reportData?.averageExamined?.toFixed(1) || (totalStudents > 0 ? ((examinedStudents / totalStudents) * 100).toFixed(1) : '0');
+
+  // Nutrition data from API
+  const nutritionData = {
+    underWeight: reportData?.underWeightCount || 0,
+    overWeight: reportData?.overWeightCount || 0,
+    obesity: reportData?.obesityCount || 0,
   };
 
-  // Count nutrition status
-  const countNutrition = {
-    sdd: countHealthIssue('sdd'),
-    overweight: countHealthIssue('overweight'),
-    obesity: countHealthIssue('obesity'),
-  };
-
-  const healthStats = [
-    { name: 'Cận thị đúng số', count: countHealthIssue('myopia_correct') },
-    { name: 'Cận thị chưa đúng số', count: countHealthIssue('myopia_incorrect') },
-    { name: 'Viễn thị', count: countHealthIssue('hyperopia') },
-    { name: 'Loạn thị', count: countHealthIssue('astigmatism') },
-    { name: 'Lác', count: countHealthIssue('strabismus') },
-    { name: 'TD tật khúc xạ', count: countHealthIssue('refractive_error') },
-    { name: 'Viêm kết mạc', count: countHealthIssue('vkm') },
-    { name: 'Viêm mũi họng', count: countHealthIssue('nose_inflammation') + countHealthIssue('throat_inflammation') },
-    { name: 'Viêm tai giữa', count: countHealthIssue('ear_infection') },
-    { name: 'Sâu răng', count: countHealthIssue('cavities') },
-    { name: 'Mất răng', count: 0 },
-    { name: 'Răng đã hàn', count: 0 },
-    { name: 'Viêm lợi', count: countHealthIssue('gingivitis') },
-  ];
-
-  const healthStats2 = [
-    { name: 'Cong cột sống', count: countHealthIssue('scoliosis') },
-    { name: 'Vẹo cột sống', count: 0 },
-    { name: 'Bệnh khác về cơ xương khớp', count: countHealthIssue('flat_feet') + countHealthIssue('limb_deformity') },
-    { name: 'Viêm da', count: countHealthIssue('eczema') + countHealthIssue('fungal_infection') },
-    { name: 'Vẩy nến', count: 0 },
-    { name: 'Bệnh khác về da liễu', count: countHealthIssue('skin_allergy') },
-    { name: 'Tâm thần phân liệt', count: 0 },
-    { name: 'Rối loạn tâm thần', count: countHealthIssue('anxiety') + countHealthIssue('depression') + countHealthIssue('behavioral_disorder') },
-    { name: 'Hẹn phế quản', count: 0 },
-    { name: 'Thấp tim', count: countHealthIssue('heart_disease') },
-    { name: 'Bướu cổ', count: 0 },
-    { name: 'Dị tật bẩm sinh', count: 0 },
-    { name: 'Bệnh khác về nội khoa', count: countHealthIssue('respiratory_disease') + countHealthIssue('digestive_disease') },
-  ];
+  // Split disease reports into two columns
+  const halfLength = Math.ceil(diseaseReports.length / 2);
+  const leftColumnReports = diseaseReports.slice(0, halfLength);
+  const rightColumnReports = diseaseReports.slice(halfLength);
 
   const handlePrint = () => {
     window.print();
@@ -68,7 +106,7 @@ export function HealthReportModal({ isOpen, onClose, students }: HealthReportMod
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.15)' }}>
       <div className="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header Actions */}
         <div className="bg-gray-100 p-4 border-b border-gray-200 flex items-center justify-between print:hidden">
@@ -96,6 +134,15 @@ export function HealthReportModal({ isOpen, onClose, students }: HealthReportMod
 
         {/* Report Content */}
         <div className="flex-1 overflow-y-auto p-8 bg-white">
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-gray-500">Đang tải dữ liệu báo cáo...</div>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-red-600">{error}</div>
+            </div>
+          ) : (
           <div className="max-w-4xl mx-auto bg-white" id="report-content">
             {/* Header */}
             <div className="flex justify-between mb-8 text-center">
@@ -113,13 +160,13 @@ export function HealthReportModal({ isOpen, onClose, students }: HealthReportMod
             <div className="text-center mb-6">
               <h1 className="uppercase mb-2">BIÊN BẢN</h1>
               <p>Thông nhất kết quả khám, kiểm tra sức khỏe học sinh</p>
-              <p>năm học 2025 - 2026</p>
+              <p>năm học {campaign?.schoolYear || '2025 - 2026'}</p>
             </div>
 
             {/* School Information */}
             <div className="mb-6 space-y-2">
-              <div>1. Tên trường: THCS Bố Đề</div>
-              <div>2. Tổng số lớp: 20 lớp</div>
+              <div>1. Tên trường: {campaign?.school?.schoolName || 'THCS Bố Đề'}</div>
+              <div>2. Địa chỉ: {campaign?.school?.address || ''}</div>
               <div>3. Tổng số học sinh: {totalStudents} học sinh</div>
               <div>
                 4. Tổng số học sinh được khám: {examinedStudents} học sinh 
@@ -140,23 +187,26 @@ export function HealthReportModal({ isOpen, onClose, students }: HealthReportMod
                   </tr>
                 </thead>
                 <tbody>
-                  {healthStats.map((stat, index) => (
-                    <tr key={index}>
-                      <td className="border border-gray-900 p-2">{stat.name}</td>
-                      <td className="border border-gray-900 p-2 text-center">{stat.count}</td>
-                      {healthStats2[index] ? (
-                        <>
-                          <td className="border border-gray-900 p-2">{healthStats2[index].name}</td>
-                          <td className="border border-gray-900 p-2 text-center">{healthStats2[index].count}</td>
-                        </>
-                      ) : (
-                        <>
-                          <td className="border border-gray-900 p-2"></td>
-                          <td className="border border-gray-900 p-2"></td>
-                        </>
-                      )}
-                    </tr>
-                  ))}
+                  {leftColumnReports.map((leftReport, index) => {
+                    const rightReport = rightColumnReports[index];
+                    return (
+                      <tr key={index}>
+                        <td className="border border-gray-900 p-2">{leftReport.diseaseName}</td>
+                        <td className="border border-gray-900 p-2 text-center">{leftReport.totalCase}</td>
+                        {rightReport ? (
+                          <>
+                            <td className="border border-gray-900 p-2">{rightReport.diseaseName}</td>
+                            <td className="border border-gray-900 p-2 text-center">{rightReport.totalCase}</td>
+                          </>
+                        ) : (
+                          <>
+                            <td className="border border-gray-900 p-2"></td>
+                            <td className="border border-gray-900 p-2"></td>
+                          </>
+                        )}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -165,24 +215,25 @@ export function HealthReportModal({ isOpen, onClose, students }: HealthReportMod
             <div className="mb-8">
               <p className="italic">* Tình trạng dinh dưỡng:</p>
               <div className="flex gap-4 ml-4">
-                <span>- Nhẹ cân, thấp còi: {countNutrition.sdd}</span>
-                <span>- Thừa cân: {countNutrition.overweight}</span>
-                <span>- Béo phì: {countNutrition.obesity}</span>
+                <span>- Suy dinh dưỡng: {nutritionData.underWeight}</span>
+                <span>- Thừa cân: {nutritionData.overWeight}</span>
+                <span>- Béo phì: {nutritionData.obesity}</span>
               </div>
             </div>
 
             {/* Signatures */}
-            <div className="flex justify-between text-center mt-16">
+            <div className="flex justify-between text-center mt-16 page-break-inside-avoid">
               <div className="flex-1">
                 <p className="italic">Ngày ... tháng ... năm 202...</p>
-                <p className="uppercase mb-16">TM.BAN GIÁM HIỆU TRƯỜNG</p>
+                <p className="uppercase mb-20">TM.BAN GIÁM HIỆU TRƯỜNG</p>
               </div>
               <div className="flex-1">
                 <p className="italic">Ngày ... tháng ... năm 202...</p>
-                <p className="uppercase mb-16">TM. ĐOÀN KHÁM</p>
+                <p className="uppercase mb-20">TM. ĐOÀN KHÁM</p>
               </div>
             </div>
           </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -214,6 +265,10 @@ export function HealthReportModal({ isOpen, onClose, students }: HealthReportMod
           }
           .print\\:hidden {
             display: none !important;
+          }
+          .page-break-inside-avoid {
+            page-break-inside: avoid;
+            break-inside: avoid;
           }
         }
       `}</style>

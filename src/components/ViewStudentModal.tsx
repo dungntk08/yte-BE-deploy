@@ -57,7 +57,7 @@ export function ViewStudentModal({ student, onClose }: ViewStudentModalProps) {
   const [activeTab, setActiveTab] = useState<'info' | 'health' | 'events' | 'specialist'>('info');
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.15)' }}>
       <div className="bg-white rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="bg-gray-100 p-4 border-b border-gray-200">

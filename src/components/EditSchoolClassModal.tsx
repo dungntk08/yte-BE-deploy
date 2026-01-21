@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
+import { FloatingInput } from './ui/floating-input';
+import { toast } from 'sonner';
 import schoolClassService, { SchoolClassRequestDTO, SchoolClassResponseDTO } from '../services/schoolClassService';
 import { SchoolResponseDTO } from '../services/schoolService';
 
@@ -33,9 +33,11 @@ export function EditSchoolClassModal({ isOpen, schoolClass, school, onClose, onS
 
     try {
       await schoolClassService.updateSchoolClass(schoolClass.id, formData);
+      toast.success('Cập nhật lớp học thành công!');
       onSuccess();
     } catch (err) {
       setError('Không thể cập nhật lớp học. Vui lòng thử lại.');
+      toast.error('Không thể cập nhật lớp học');
       console.error('Error updating school class:', err);
     } finally {
       setLoading(false);
@@ -50,92 +52,92 @@ export function EditSchoolClassModal({ isOpen, schoolClass, school, onClose, onS
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.15)' }}
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-lg shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
+        style={{ maxWidth: '420px', width: '100%' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Chỉnh sửa lớp học</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-gray-900">Chỉnh sửa lớp học</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+          <div className="flex-1 overflow-y-auto p-6">
+            {error && (
+              <div className="mb-6 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label>Trường</Label>
-            <Input value={school.schoolName} disabled />
-          </div>
+            <div className="space-y-6">
+              <FloatingInput
+                value={school.schoolName}
+                label="Tên trường"
+                disabled
+                className="rounded-lg bg-gray-100 py-3 text-base"
+              />
 
-          <div>
-            <Label htmlFor="classCode">Mã lớp *</Label>
-            <Input
-              id="classCode"
-              value={formData.classCode}
-              onChange={(e) => handleChange('classCode', e.target.value)}
-              placeholder="Nhập mã lớp"
-              required
-            />
-          </div>
+              <FloatingInput
+                id="classCode"
+                label="Mã lớp *"
+                value={formData.classCode}
+                onChange={(e) => handleChange('classCode', e.target.value)}
+                className="rounded-lg py-3 text-base"
+                required
+              />
 
-          <div>
-            <Label htmlFor="className">Tên lớp *</Label>
-            <Input
-              id="className"
-              value={formData.className}
-              onChange={(e) => handleChange('className', e.target.value)}
-              placeholder="Nhập tên lớp"
-              required
-            />
-          </div>
+              <FloatingInput
+                id="className"
+                label="Tên lớp *"
+                value={formData.className}
+                onChange={(e) => handleChange('className', e.target.value)}
+                className="rounded-lg py-3 text-base"
+                required
+              />
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label htmlFor="grade">Khối *</Label>
-              <Input
-                id="grade"
-                type="number"
-                min="1"
-                max="12"
-                value={formData.grade}
-                onChange={(e) => handleChange('grade', parseInt(e.target.value))}
+              <div className="grid grid-cols-2 gap-3">
+                <FloatingInput
+                  id="grade"
+                  label="Khối *"
+                  type="number"
+                  min="1"
+                  max="12"
+                  value={formData.grade}
+                  onChange={(e) => handleChange('grade', parseInt(e.target.value))}
+                  className="rounded-lg py-3 text-base"
+                  required
+                />
+
+                <FloatingInput
+                  id="totalStudent"
+                  label="Sĩ số"
+                  type="number"
+                  min="0"
+                  value={formData.totalStudent}
+                  onChange={(e) => handleChange('totalStudent', parseInt(e.target.value))}
+                  className="rounded-lg py-3 text-base"
+                />
+              </div>
+
+              <FloatingInput
+                id="schoolYear"
+                label="Năm học *"
+                value={formData.schoolYear}
+                onChange={(e) => handleChange('schoolYear', e.target.value)}
+                className="rounded-lg py-3 text-base"
                 required
               />
             </div>
-
-            <div>
-              <Label htmlFor="totalStudent">Sĩ số</Label>
-              <Input
-                id="totalStudent"
-                type="number"
-                min="0"
-                value={formData.totalStudent}
-                onChange={(e) => handleChange('totalStudent', parseInt(e.target.value))}
-              />
-            </div>
           </div>
 
-          <div>
-            <Label htmlFor="schoolYear">Năm học *</Label>
-            <Input
-              id="schoolYear"
-              value={formData.schoolYear}
-              onChange={(e) => handleChange('schoolYear', e.target.value)}
-              placeholder="VD: 2024-2025"
-              required
-            />
-          </div>
-
-          <div className="flex gap-3 justify-end pt-4">
+          <div className="border-t border-gray-200 p-6 pt-4 flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={onClose}>
               Hủy
             </Button>

@@ -1,13 +1,16 @@
-import { X, Upload, Download, FileSpreadsheet, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Upload, Download, FileSpreadsheet, CheckCircle, AlertCircle, Plus } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import medicalResultService from '../services/medicalResultService';
-import { useSchools } from '../hooks/useSchools';
-import { useSchoolClasses } from '../hooks/useSchoolClasses';
+import campaignService, { MedicalCampaign } from '../services/campaignService';
+import schoolService, { SchoolResponseDTO } from '../services/schoolService';
+import schoolClassService, { SchoolClassResponseDTO } from '../services/schoolClassService';
+import { AddSchoolModal } from './AddSchoolModal';
+import { AddSchoolClassModal } from './AddSchoolClassModal';
 
 interface ImportExcelModalProps {
   isOpen: boolean;
   onClose: () => void;
-  campaignId: number;
+  campaignId?: number; // Làm optional vì giờ chọn từ dropdown
   onImportSuccess: () => void;
 }
 
@@ -17,28 +20,80 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [campaigns, setCampaigns] = useState<MedicalCampaign[]>([]);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(campaignId || null);
+  const [loadingCampaigns, setLoadingCampaigns] = useState(false);
   
-  // School and Class selection
+  // Thêm state cho schools và classes
+  const [schools, setSchools] = useState<SchoolResponseDTO[]>([]);
   const [selectedSchoolId, setSelectedSchoolId] = useState<number | null>(null);
-  const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
+  const [loadingSchools, setLoadingSchools] = useState(false);
   
-  const { schools, loading: loadingSchools } = useSchools();
-  const { schoolClasses, loading: loadingClasses } = useSchoolClasses();
+  const [classes, setClasses] = useState<SchoolClassResponseDTO[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
+  const [loadingClasses, setLoadingClasses] = useState(false);
 
-  // Filter classes based on selected school
-  const filteredClasses = selectedSchoolId
-    ? schoolClasses.filter(cls => {
-        // Lọc theo schoolCode từ classCode (ví dụ: MN001-MG1 -> MN001)
-        const school = schools.find(s => s.id === selectedSchoolId);
-        if (!school) return false;
-        return cls.classCode?.startsWith(school.schoolCode || '');
-      })
-    : schoolClasses;
+  // Modal states
+  const [isAddSchoolModalOpen, setIsAddSchoolModalOpen] = useState(false);
+  const [isAddClassModalOpen, setIsAddClassModalOpen] = useState(false);
 
-  // Reset class when school changes
+  // Load campaigns khi modal mở
   useEffect(() => {
-    setSelectedClassId(null);
+    if (isOpen) {
+      loadCampaigns();
+      loadSchools();
+    }
+  }, [isOpen]);
+
+  const loadCampaigns = async () => {
+    setLoadingCampaigns(true);
+    try {
+      const data = await campaignService.getAllCampaigns();
+      setCampaigns(data);
+      // Nếu có campaignId từ props, set làm mặc định
+      if (campaignId && !selectedCampaignId) {
+        setSelectedCampaignId(campaignId);
+      }
+    } catch (err: any) {
+      setError('Không thể tải danh sách đợt khám');
+    } finally {
+      setLoadingCampaigns(false);
+    }
+  };
+
+  const loadSchools = async () => {
+    setLoadingSchools(true);
+    try {
+      const data = await schoolService.getAllSchools();
+      setSchools(data);
+    } catch (err: any) {
+      setError('Không thể tải danh sách trường học');
+    } finally {
+      setLoadingSchools(false);
+    }
+  };
+
+  // Load classes khi school được chọn
+  useEffect(() => {
+    if (selectedSchoolId) {
+      loadClasses(selectedSchoolId);
+    } else {
+      setClasses([]);
+      setSelectedClassId(null);
+    }
   }, [selectedSchoolId]);
+
+  const loadClasses = async (schoolId: number) => {
+    setLoadingClasses(true);
+    try {
+      const data = await schoolClassService.getSchoolClassesBySchool(schoolId);
+      setClasses(data);
+    } catch (err: any) {
+      setError('Không thể tải danh sách lớp học');
+    } finally {
+      setLoadingClasses(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -58,38 +113,55 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
   };
 
   const handleDownloadTemplate = async () => {
+    if (!selectedCampaignId) {
+      setError('Vui lòng chọn đợt khám trước');
+      return;
+    }
+    if (!selectedSchoolId) {
+      setError('Vui lòng chọn trường học trước');
+      return;
+    }
+    if (!selectedClassId) {
+      setError('Vui lòng chọn lớp học trước');
+      return;
+    }
+    
     setDownloading(true);
     setError(null);
     try {
-      const blob = await medicalResultService.downloadTemplate(campaignId);
+      const blob = await medicalResultService.downloadTemplate(selectedCampaignId, selectedSchoolId, selectedClassId);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `mau-ket-qua-kham-campaign-${campaignId}.xlsx`;
+      a.download = `mau-ket-qua-kham-campaign-${selectedCampaignId}.xlsx`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Có lỗi xảy ra khi tải file mẫu');
+      const errorMsg = err?.response?.data?.message || err?.message || 'Có lỗi xảy ra khi tải file mẫu';
+      setError(String(errorMsg));
     } finally {
       setDownloading(false);
     }
   };
 
   const handleUpload = async () => {
+    if (!selectedCampaignId) {
+      setError('Vui lòng chọn đợt khám trước');
+      return;
+    }
+    if (!selectedSchoolId) {
+      setError('Vui lòng chọn trường học trước');
+      return;
+    }
+    if (!selectedClassId) {
+      setError('Vui lòng chọn lớp học trước');
+      return;
+    }
+    
     if (!selectedFile) {
       setError('Vui lòng chọn file để upload');
-      return;
-    }
-
-    if (!selectedSchoolId) {
-      setError('Vui lòng chọn trường học');
-      return;
-    }
-
-    if (!selectedClassId) {
-      setError('Vui lòng chọn lớp học');
       return;
     }
 
@@ -98,7 +170,7 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
     setSuccess(null);
 
     try {
-      const message = await medicalResultService.importExcel(campaignId, selectedFile);
+      const message = await medicalResultService.importExcel(selectedCampaignId, selectedSchoolId, selectedClassId, selectedFile);
       setSuccess(message || 'Import kết quả khám thành công');
       setSelectedFile(null);
       
@@ -108,7 +180,8 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
         onClose();
       }, 1500);
     } catch (err: any) {
-      setError(err.response?.data || err.response?.data?.message || 'Có lỗi xảy ra khi import file');
+      const errorMsg = err?.response?.data?.message || err?.message || 'Có lỗi xảy ra khi import file';
+      setError(String(errorMsg));
     } finally {
       setUploading(false);
     }
@@ -118,13 +191,27 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
     setSelectedFile(null);
     setError(null);
     setSuccess(null);
+    setSelectedCampaignId(campaignId || null);
     setSelectedSchoolId(null);
     setSelectedClassId(null);
+    setClasses([]);
     onClose();
   };
 
+  const handleSchoolAdded = async () => {
+    await loadSchools();
+    setIsAddSchoolModalOpen(false);
+  };
+
+  const handleClassAdded = async () => {
+    if (selectedSchoolId) {
+      await loadClasses(selectedSchoolId);
+    }
+    setIsAddClassModalOpen(false);
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.15)' }}>
       <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -136,6 +223,106 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
+          {/* Campaign Selection */}
+          <div className="mb-6">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Chọn đợt khám <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={selectedCampaignId || ''}
+              onChange={(e) => {
+                setSelectedCampaignId(e.target.value ? Number(e.target.value) : null);
+                setError(null);
+              }}
+              disabled={true}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              <option value="">
+                {loadingCampaigns ? 'Đang tải...' : 'Chọn đợt khám'}
+              </option>
+              {campaigns.map((campaign) => (
+                <option key={campaign.id} value={campaign.id}>
+                  {campaign.campaignName} - {campaign.schoolYear}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* School Selection */}
+          <div className="mb-6">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Chọn trường học <span className="text-red-500">*</span>
+            </label>
+            <div className="flex gap-2">
+              <select
+                value={selectedSchoolId || ''}
+                onChange={(e) => {
+                  setSelectedSchoolId(e.target.value ? Number(e.target.value) : null);
+                  setError(null);
+                }}
+                disabled={loadingSchools}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">
+                  {loadingSchools ? 'Đang tải...' : 'Chọn trường học'}
+                </option>
+                {schools.map((school) => (
+                  <option key={school.id} value={school.id}>
+                    {school.schoolName}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setIsAddSchoolModalOpen(true)}
+                className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                title="Thêm trường học mới"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm">Thêm</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Class Selection */}
+          <div className="mb-6">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Chọn lớp học <span className="text-red-500">*</span>
+            </label>
+            <div className="flex gap-2">
+              <select
+                value={selectedClassId || ''}
+                onChange={(e) => {
+                  setSelectedClassId(e.target.value ? Number(e.target.value) : null);
+                  setError(null);
+                }}
+                disabled={!selectedSchoolId || loadingClasses}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">
+                  {!selectedSchoolId 
+                    ? 'Vui lòng chọn trường học trước' 
+                    : loadingClasses 
+                    ? 'Đang tải...' 
+                    : 'Chọn lớp học'}
+                </option>
+                {classes.map((classItem) => (
+                  <option key={classItem.id} value={classItem.id}>
+                    {classItem.className} - Khối {classItem.grade}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setIsAddClassModalOpen(true)}
+                disabled={!selectedSchoolId}
+                className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                title="Thêm lớp học mới"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm">Thêm</span>
+              </button>
+            </div>
+          </div>
+
           {/* Info Banner */}
           <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 flex items-start gap-3">
             <div className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -144,58 +331,11 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
             <div className="text-blue-700 text-sm">
               <p className="mb-2">Hướng dẫn import file Excel:</p>
               <ol className="list-decimal list-inside space-y-1 text-xs">
-                <li>Chọn trường và lớp học cần import</li>
                 <li>Tải file mẫu Excel bằng nút bên dưới</li>
                 <li>Điền thông tin học sinh và kết quả khám vào file mẫu</li>
                 <li>Upload file đã điền thông tin</li>
                 <li>Hệ thống sẽ tự động import dữ liệu</li>
               </ol>
-            </div>
-          </div>
-
-          {/* School and Class Selection */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <h3 className="mb-3 font-medium text-gray-900">Chọn trường và lớp học</h3>
-            <div className="grid grid-cols-2 gap-4">
-              {/* School Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Trường học <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={selectedSchoolId || ''}
-                  onChange={(e) => setSelectedSchoolId(Number(e.target.value) || null)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={loadingSchools}
-                >
-                  <option value="">-- Chọn trường --</option>
-                  {schools.map((school) => (
-                    <option key={school.id} value={school.id}>
-                      {school.schoolName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Class Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Lớp học <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={selectedClassId || ''}
-                  onChange={(e) => setSelectedClassId(Number(e.target.value) || null)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={loadingClasses || !selectedSchoolId}
-                >
-                  <option value="">-- Chọn lớp --</option>
-                  {filteredClasses.map((cls) => (
-                    <option key={cls.id} value={cls.id}>
-                      {cls.className}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
           </div>
 
@@ -292,7 +432,7 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
           </button>
           <button
             onClick={handleUpload}
-            disabled={!selectedFile || !selectedSchoolId || !selectedClassId || uploading}
+            disabled={!selectedFile || uploading}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm flex items-center gap-2"
           >
             <Upload className="w-4 h-4" />
@@ -300,6 +440,23 @@ export function ImportExcelModal({ isOpen, onClose, campaignId, onImportSuccess 
           </button>
         </div>
       </div>
+
+      {/* Add School Modal */}
+      <AddSchoolModal
+        isOpen={isAddSchoolModalOpen}
+        onClose={() => setIsAddSchoolModalOpen(false)}
+        onSuccess={handleSchoolAdded}
+      />
+
+      {/* Add Class Modal */}
+      {selectedSchoolId && (
+        <AddSchoolClassModal
+          isOpen={isAddClassModalOpen}
+          onClose={() => setIsAddClassModalOpen(false)}
+          onSuccess={handleClassAdded}
+          school={schools.find(s => s.id === selectedSchoolId)!}
+        />
+      )}
     </div>
   );
 }

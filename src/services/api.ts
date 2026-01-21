@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Cấu hình base URL - thay đổi theo backend của bạn
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8088/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api-ytehd.saokhue.io/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

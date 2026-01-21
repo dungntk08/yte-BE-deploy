@@ -42,13 +42,13 @@ export function CampaignListPage({ onSelectCampaign, onCreateCampaign }: Campaig
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'CLOSED':
-        return <Badge variant="secondary">Đã khóa</Badge>;
+        return <Badge className="bg-[#ECEEF2] text-black font-bold rounded-lg hover:bg-[#ECEEF2]/90">Đã khóa</Badge>;
       case 'IN_PROGRESS':
-        return <Badge className="bg-yellow-500 text-white hover:bg-yellow-600">Chưa khóa</Badge>;
+        return <Badge className="bg-[#ECEEF2] text-black font-bold rounded-lg hover:bg-[#ECEEF2]/90">Chưa khóa</Badge>;
       case 'DRAFT':
-        return <Badge variant="outline">Nháp</Badge>;
+        return <Badge className="bg-[#ECEEF2] text-black font-bold rounded-lg hover:bg-[#ECEEF2]/90">Nháp</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge className="bg-[#ECEEF2] text-black font-bold rounded-lg hover:bg-[#ECEEF2]/90">{status}</Badge>;
     }
   };
 
@@ -78,54 +78,45 @@ export function CampaignListPage({ onSelectCampaign, onCreateCampaign }: Campaig
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 px-6 py-6" style={{ padding: '48px 130px' }}>
       {/* Header */}
-      <div className="max-w-7xl mx-auto mb-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 pb-8 mt-2.5 border-b border-gray-200" style={{ paddingBottom: '37px' }}>
+        <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Bảng khám sức khỏe</h1>
+            <h1 className="!text-[50px] !font-bold !text-gray-900" style={{ fontSize: '30px', fontWeight: 'bold' }}>Bảng khám sức khỏe</h1>
             {useMockData && (
               <p className="text-sm text-amber-600 mt-1">
                 ⚠️ Đang sử dụng dữ liệu mẫu (Backend chưa kết nối)
               </p>
             )}
           </div>
-          <button
-            onClick={onCreateCampaign}
-            className="px-4 py-2 bg-white border-2 border-gray-900 text-gray-900 rounded-md hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Thêm mới
-          </button>
-        </div>
-
-        {/* Year Tabs */}
-        <Tabs value={selectedYear} onValueChange={setSelectedYear} className="mb-4">
-          <TabsList>
-            <TabsTrigger value="all">Tất cả</TabsTrigger>
-            {availableYears.map(year => (
-              <TabsTrigger key={year} value={year}>
-                {year}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-
-        {/* Search Bar */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Tìm kiếm đợt khám..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+          
+          <div className="flex items-center gap-4">
+            {/* Search Bar */}
+            <div className="relative" style={{ width: '300px' }}>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Tìm kiếm đợt khám..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 w-full rounded-full"
+              />
+            </div>
+            
+            <button
+              onClick={onCreateCampaign}
+              className="flex items-center gap-2 px-4 py-2 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Thêm mới</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Campaign Cards Grid */}
-      <div className="max-w-7xl mx-auto">
+      <div>
         {filteredCampaigns.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500">Không tìm thấy đợt khám nào</p>
@@ -135,18 +126,18 @@ export function CampaignListPage({ onSelectCampaign, onCreateCampaign }: Campaig
             {filteredCampaigns.map((campaign: ExamPeriod) => (
               <Card
                 key={campaign.id}
-                className="p-5 hover:shadow-lg transition-shadow cursor-pointer rounded-xl border-2"
+                className="p-4 border-2 border-gray-300 rounded-lg hover:shadow-lg hover:border-blue-400 transition-all cursor-pointer flex flex-col"
                 onClick={() => onSelectCampaign?.(campaign)}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Calendar className="w-6 h-6 text-blue-600" />
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-5 h-5 text-blue-600" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">{campaign.campaignName}</h3>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium text-gray-900 truncate">{campaign.campaignName}</h3>
                       {campaign.schoolYear && (
-                        <p className="text-sm text-gray-500">Năm học {campaign.schoolYear}</p>
+                        <p className="text-xs text-gray-500 truncate">Năm học {campaign.schoolYear}</p>
                       )}
                     </div>
                   </div>
@@ -183,14 +174,14 @@ export function CampaignListPage({ onSelectCampaign, onCreateCampaign }: Campaig
 
                 <div className="space-y-2 mb-3">
                   <div className="flex items-center text-sm text-gray-600">
-                    <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <Calendar className="w-4 h-4 mr-2" />
                     <span>
                       {formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}
                     </span>
                   </div>
                   {(campaign.totalStudents !== undefined || campaign.totalStudentsExamined !== undefined) && (
                     <div className="flex items-center text-sm text-gray-600">
-                      <Users className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <Users className="w-4 h-4 mr-2" />
                       <span>
                         {campaign.totalStudentsExamined || 0} / {campaign.totalStudents || 0} học sinh
                       </span>
@@ -199,7 +190,7 @@ export function CampaignListPage({ onSelectCampaign, onCreateCampaign }: Campaig
                 </div>
 
                 {campaign.note && (
-                  <p className="text-sm text-gray-500 line-clamp-2">{campaign.note}</p>
+                  <p className="text-xs text-gray-500 line-clamp-2">{campaign.note}</p>
                 )}
               </Card>
             ))}
